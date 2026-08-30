@@ -49,4 +49,15 @@ public class TransactionController {
     public String checkBudgetStatus(@RequestParam String category) {
         return expenseServ.checkBudget(category);
     }
+    
+    @GetMapping("/expenses/summary")
+    public Map<String, Double> getExpenseSummary() {
+        return expenseServ.getExpenseSummary();
+    }
+    
+    @GetMapping("/transactions/recent")
+    public List<Transaction> getRecentTransactions() {
+        return expenseServ.getRecentTransactions();
+    }
+
 }

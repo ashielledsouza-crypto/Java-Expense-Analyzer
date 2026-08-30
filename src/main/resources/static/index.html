@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker API Dashboard</title>
+    <!-- Added Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
@@ -79,6 +81,30 @@
             </form>
             <div class="result-box" id="res-budget-status">Response will appear here...</div>
         </div>
+
+        <!-- 6. Expense Summary (GET) -->
+        <div class="card">
+            <h3>6. Expense Summary</h3>
+            <p style="font-size: 14px; color: #666;">Totals for this month, quarter, and year.</p>
+            <button id="btnSummary">GET /api/expenses/summary</button>
+            <div class="result-box" id="res-summary">Response will appear here...</div>
+        </div>
+        
+        <!-- 7. Visual Cashflow Chart -->
+        <div class="card">
+            <h3>7. Visual Cashflow</h3>
+            <p style="font-size: 14px; color: #666;">Compare Income vs. Expenses.</p>
+            <button id="btnLoadChart">Generate Pie Chart</button>
+            <canvas id="cashflowChart" style="margin-top: 15px; max-height: 300px;"></canvas>
+        </div>
+        
+        <!-- 8. Recent Transactions -->
+        <div class="card">
+            <h3>8. Recent Transactions</h3>
+            <p style="font-size: 14px; color: #666;">View your 5 most recent entries.</p>
+            <button id="btnRecent">GET /api/transactions/recent</button>
+            <div class="result-box" id="res-recent">Response will appear here...</div>
+        </div>
     </div>
 
     <script>
@@ -144,10 +170,56 @@
         document.getElementById('formBudgetStatus').addEventListener('submit', function(e) {
             e.preventDefault();
             const category = document.getElementById('bs-category').value;
-            // Text response expected, so we use .text() instead of .json()
             fetch(`/api/budgets/status?category=${category}`)
             .then(res => res.text()).then(data => showResult('res-budget-status', data))
             .catch(err => showResult('res-budget-status', 'Error: ' + err));
+        });
+
+        // 6. Expense Summary
+        document.getElementById('btnSummary').addEventListener('click', function() {
+            fetch('/api/expenses/summary')
+            .then(res => res.json()).then(data => showResult('res-summary', data))
+            .catch(err => showResult('res-summary', 'Error: ' + err));
+        });
+
+        // 7. Render Chart.js Pie Chart
+        let cashflowChartInstance = null;
+
+        document.getElementById('btnLoadChart').addEventListener('click', function() {
+            fetch('/api/cashflow')
+            .then(res => res.json())
+            .then(data => {
+                const ctx = document.getElementById('cashflowChart').getContext('2d');
+                
+                if (cashflowChartInstance != null) {
+                    cashflowChartInstance.destroy();
+                }
+
+                cashflowChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Total Income', 'Total Expense'],
+                        datasets: [{
+                            data: [data['Total Income'] || 0, data['Total Expense'] || 0],
+                            backgroundColor: ['#28a745', '#dc3545'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            })
+            .catch(err => alert('Error loading chart: ' + err));
+        });
+        
+        // 8. Recent Transactions
+        document.getElementById('btnRecent').addEventListener('click', function() {
+            fetch('/api/transactions/recent')
+            .then(res => res.json())
+            .then(data => showResult('res-recent', data))
+            .catch(err => showResult('res-recent', 'Error: ' + err));
         });
     </script>
 </body>

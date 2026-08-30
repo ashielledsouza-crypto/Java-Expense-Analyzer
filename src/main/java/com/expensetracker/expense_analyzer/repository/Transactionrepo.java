@@ -13,6 +13,11 @@ public interface Transactionrepo extends JpaRepository<Transaction,Long>{
 	List<Transaction> findByType(String Type);
 	
     List<Transaction> findByCategoryAndType(String Category, String Type);
+    
+    List<Transaction> findByTypeAndDateBetween(String type, LocalDate startDate, LocalDate endDate);
+    
+    List<Transaction> findTop5ByOrderByDateDesc();
+
 
 
 }

@@ -66,6 +66,44 @@ public class expenseservice {
         }
         return "Safe. Remaining balance: ₹" + (budget.getMonthlyLimit() - totalSpent);
     }
+    
+ // 1. A helper method so we don't repeat the stream code three times
+    private double getSumForPeriod(String type, LocalDate start, LocalDate end) {
+        List<Transaction> transactions = transactionRepository.findByTypeAndDateBetween(type, start, end);
+        // NOTE: If you haven't fixed your casing yet, change getAmount() back to getamount()
+        return transactions.stream().mapToDouble(Transaction::getAmount).sum(); 
+    }
+
+    // 2. The main method to calculate the current Month, Quarter, and Year
+    public Map<String, Double> getExpenseSummary() {
+        LocalDate today = LocalDate.now();
+        
+        // MONTH: 1st day of month to last day of month
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+        
+        // YEAR: Jan 1st to Dec 31st
+        LocalDate startOfYear = today.withDayOfYear(1);
+        LocalDate endOfYear = today.withDayOfYear(today.lengthOfYear());
+        
+        // QUARTER: Math to figure out if we are in Q1, Q2, Q3, or Q4
+        int currentMonth = today.getMonthValue();
+        int quarterStartMonth = ((currentMonth - 1) / 3) * 3 + 1;
+        LocalDate startOfQuarter = LocalDate.of(today.getYear(), quarterStartMonth, 1);
+        LocalDate endOfQuarter = startOfQuarter.plusMonths(3).minusDays(1);
+
+        // Package the results
+        Map<String, Double> summary = new HashMap<>();
+        summary.put("This Month", getSumForPeriod("EXPENSE", startOfMonth, endOfMonth));
+        summary.put("This Quarter", getSumForPeriod("EXPENSE", startOfQuarter, endOfQuarter));
+        summary.put("This Year", getSumForPeriod("EXPENSE", startOfYear, endOfYear));
+        
+        return summary;
+    }
+    	
+    public List<Transaction> getRecentTransactions() {
+        return transactionRepository.findTop5ByOrderByDateDesc();
+    }
 
 
 
