@@ -59,5 +59,17 @@ public class TransactionController {
     public List<Transaction> getRecentTransactions() {
         return expenseServ.getRecentTransactions();
     }
+    
+ // 6. Delete a transaction
+    @DeleteMapping("/transactions/{id}")
+    public String deleteTransaction(@PathVariable Long id) {
+        return expenseServ.deleteTransaction(id);
+    }
 
+    // 7. Update a transaction
+    @PutMapping("/transactions/{id}")
+    public Transaction updateTransaction(@PathVariable Long id, @RequestBody Transaction transaction) {
+        return expenseServ.updateTransaction(id, transaction);
+    }
+    
 }

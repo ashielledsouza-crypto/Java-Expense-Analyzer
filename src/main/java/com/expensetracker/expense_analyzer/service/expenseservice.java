@@ -104,7 +104,27 @@ public class expenseservice {
     public List<Transaction> getRecentTransactions() {
         return transactionRepository.findTop5ByOrderByDateDesc();
     }
+    
+ // Delete a transaction by its ID
+    public String deleteTransaction(Long id) {
+        if (transactionRepository.existsById(id)) {
+            transactionRepository.deleteById(id);
+            return "Transaction " + id + " was successfully deleted.";
+        }
+        return "Error: Transaction not found.";
+    }
 
+    // Update an existing transaction
+    public Transaction updateTransaction(Long id, Transaction updatedTx) {
+        return transactionRepository.findById(id).map(existingTx -> {
+            existingTx.setType(updatedTx.getType());
+            existingTx.setAmount(updatedTx.getAmount());
+            existingTx.setCategory(updatedTx.getCategory());
+            existingTx.setDate(updatedTx.getDate());
+            existingTx.setDescription(updatedTx.getDescription());
+            return transactionRepository.save(existingTx);
+        }).orElse(null); // Returns null if the ID doesn't exist
+    }
 
 
 }

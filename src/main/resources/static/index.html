@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker API Dashboard</title>
-    <!-- Added Chart.js CDN -->
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
@@ -105,12 +105,43 @@
             <button id="btnRecent">GET /api/transactions/recent</button>
             <div class="result-box" id="res-recent">Response will appear here...</div>
         </div>
+
+        <!-- 9. Update Transaction (PUT) -->
+        <div class="card">
+            <h3>9. Update Transaction</h3>
+            <form id="formUpdate">
+                <input type="number" id="u-id" placeholder="Transaction ID to edit (e.g., 1)" required>
+                <select id="u-type">
+                    <option value="EXPENSE">Expense</option>
+                    <option value="INCOME">Income</option>
+                </select>
+                <input type="number" id="u-amount" placeholder="New Amount" step="0.01" required>
+                <input type="text" id="u-category" placeholder="New Category" required>
+                <input type="date" id="u-date" required>
+                <input type="text" id="u-description" placeholder="New Description">
+                <button type="submit" style="background-color: #ffc107; color: black;">PUT /api/transactions/{id}</button>
+            </form>
+            <div class="result-box" id="res-update">Response will appear here...</div>
+        </div>
+
+        <!-- 10. Delete Transaction (DELETE) -->
+        <div class="card">
+            <h3>10. Delete Transaction</h3>
+            <form id="formDelete">
+                <input type="number" id="del-id" placeholder="Transaction ID to delete (e.g., 1)" required>
+                <button type="submit" style="background-color: #dc3545;">DELETE /api/transactions/{id}</button>
+            </form>
+            <div class="result-box" id="res-delete">Response will appear here...</div>
+        </div>
     </div>
 
     <script>
         // Helper function to update the UI
         function showResult(elementId, data) {
             const box = document.getElementById(elementId);
+            // Reset styles in case it was modified by the table
+            box.style.background = "#212529";
+            box.style.padding = "10px";
             box.innerText = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
         }
 
@@ -214,12 +245,89 @@
             .catch(err => alert('Error loading chart: ' + err));
         });
         
-        // 8. Recent Transactions
+        // 8. Recent Transactions (Formatted as Table)
         document.getElementById('btnRecent').addEventListener('click', function() {
             fetch('/api/transactions/recent')
             .then(res => res.json())
-            .then(data => showResult('res-recent', data))
+            .then(data => {
+                const resBox = document.getElementById('res-recent');
+                
+                if (data.length === 0) {
+                    // Using helper function to reset styles and show text
+                    showResult('res-recent', "No recent transactions found.");
+                    return;
+                }
+
+                // Start building the HTML table
+                let tableHtml = `
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 5px; background: white; color: black; font-family: sans-serif; font-size: 14px;">
+                        <tr style="background-color: #0056b3; color: white; text-align: left;">
+                            <th style="padding: 8px; border: 1px solid #ccc;">ID</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Type</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Date</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Category</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Amount</th>
+                        </tr>
+                `;
+
+                // Loop through each transaction and create a row
+                data.forEach(tx => {
+                    // Make expenses red and income green
+                    let typeColor = tx.type === 'EXPENSE' ? '#dc3545' : '#28a745';
+                    
+                    tableHtml += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ccc;">${tx.id}</td>
+                            <td style="padding: 8px; border: 1px solid #ccc; color: ${typeColor}; font-weight: bold;">${tx.type}</td>
+                            <td style="padding: 8px; border: 1px solid #ccc;">${tx.date}</td>
+                            <td style="padding: 8px; border: 1px solid #ccc;">${tx.category}</td>
+                            <td style="padding: 8px; border: 1px solid #ccc;">$${tx.amount.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHtml += `</table>`;
+                
+                // Override the dark terminal style to display the white table
+                resBox.style.background = "transparent";
+                resBox.style.padding = "0";
+                resBox.innerHTML = tableHtml;
+            })
             .catch(err => showResult('res-recent', 'Error: ' + err));
+        });
+
+        // 9. Update Transaction
+        document.getElementById('formUpdate').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('u-id').value;
+            const payload = {
+                type: document.getElementById('u-type').value,
+                amount: parseFloat(document.getElementById('u-amount').value),
+                category: document.getElementById('u-category').value,
+                date: document.getElementById('u-date').value,
+                description: document.getElementById('u-description').value
+            };
+            fetch(`/api/transactions/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.text()) 
+            .then(data => {
+                try { showResult('res-update', JSON.parse(data)); } 
+                catch { showResult('res-update', data); }
+            })
+            .catch(err => showResult('res-update', 'Error: ' + err));
+        });
+
+        // 10. Delete Transaction
+        document.getElementById('formDelete').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('del-id').value;
+            fetch(`/api/transactions/${id}`, { method: 'DELETE' })
+            .then(res => res.text())
+            .then(data => showResult('res-delete', data))
+            .catch(err => showResult('res-delete', 'Error: ' + err));
         });
     </script>
 </body>
