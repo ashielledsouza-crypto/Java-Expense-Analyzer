@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker API Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        h1 { text-align: center; color: #333; grid-column: 1 / -1; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h3 { margin-top: 0; color: #0056b3; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        input, select, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ced4da; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #0056b3; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background-color: #004494; }
+        .result-box { background: #212529; color: #00ff00; padding: 10px; border-radius: 5px; font-family: monospace; min-height: 40px; white-space: pre-wrap; overflow-x: auto; margin-top: 10px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Backend API Tester</h1>
+
+        <!-- 1. Add Transaction (POST) -->
+        <div class="card">
+            <h3>1. Add Transaction</h3>
+            <form id="formTransaction">
+                <select id="t-type">
+                    <option value="EXPENSE">Expense</option>
+                    <option value="INCOME">Income</option>
+                </select>
+                <input type="number" id="t-amount" placeholder="Amount (e.g., 50.50)" step="0.01" required>
+                <input type="text" id="t-category" placeholder="Category (e.g., Food, Salary)" required>
+                <input type="date" id="t-date" required>
+                <input type="text" id="t-description" placeholder="Description">
+                <button type="submit">POST /api/transactions</button>
+            </form>
+            <div class="result-box" id="res-transaction">Response will appear here...</div>
+        </div>
+
+        <!-- 2. Get Cashflow (GET) -->
+        <div class="card">
+            <h3>2. Check Cashflow</h3>
+            <p style="font-size: 14px; color: #666;">Calculates total income, expenses, and savings.</p>
+            <button id="btnCashflow">GET /api/cashflow</button>
+            <div class="result-box" id="res-cashflow">Response will appear here...</div>
+        </div>
+
+        <!-- 3. Time Travel (GET) -->
+        <div class="card">
+            <h3>3. Time Travel (Filter by Date)</h3>
+            <form id="formTimeTravel">
+                <label style="font-size: 12px; color: #555;">Start Date</label>
+                <input type="date" id="tt-start" required>
+                <label style="font-size: 12px; color: #555;">End Date</label>
+                <input type="date" id="tt-end" required>
+                <button type="submit">GET /api/timetravel</button>
+            </form>
+            <div class="result-box" id="res-timetravel">Response will appear here...</div>
+        </div>
+
+        <!-- 4. Set Budget (POST) -->
+        <div class="card">
+            <h3>4. Set Monthly Budget</h3>
+            <form id="formBudget">
+                <input type="text" id="b-category" placeholder="Category (e.g., Food)" required>
+                <input type="number" id="b-limit" placeholder="Monthly Limit (e.g., 500)" step="0.01" required>
+                <button type="submit">POST /api/budgets</button>
+            </form>
+            <div class="result-box" id="res-budget">Response will appear here...</div>
+        </div>
+
+        <!-- 5. Check Budget Status (GET) -->
+        <div class="card">
+            <h3>5. Check Budget Status</h3>
+            <form id="formBudgetStatus">
+                <input type="text" id="bs-category" placeholder="Category to check (e.g., Food)" required>
+                <button type="submit">GET /api/budgets/status</button>
+            </form>
+            <div class="result-box" id="res-budget-status">Response will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to update the UI
+        function showResult(elementId, data) {
+            const box = document.getElementById(elementId);
+            box.innerText = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+        }
+
+        // 1. Add Transaction
+        document.getElementById('formTransaction').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const payload = {
+                type: document.getElementById('t-type').value,
+                amount: parseFloat(document.getElementById('t-amount').value),
+                category: document.getElementById('t-category').value,
+                date: document.getElementById('t-date').value,
+                description: document.getElementById('t-description').value
+            };
+            fetch('/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json()).then(data => showResult('res-transaction', data))
+            .catch(err => showResult('res-transaction', 'Error: ' + err));
+        });
+
+        // 2. Cashflow
+        document.getElementById('btnCashflow').addEventListener('click', function() {
+            fetch('/api/cashflow')
+            .then(res => res.json()).then(data => showResult('res-cashflow', data))
+            .catch(err => showResult('res-cashflow', 'Error: ' + err));
+        });
+
+        // 3. Time Travel
+        document.getElementById('formTimeTravel').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const start = document.getElementById('tt-start').value;
+            const end = document.getElementById('tt-end').value;
+            fetch(`/api/timetravel?start=${start}&end=${end}`)
+            .then(res => res.json()).then(data => showResult('res-timetravel', data))
+            .catch(err => showResult('res-timetravel', 'Error: ' + err));
+        });
+
+        // 4. Set Budget
+        document.getElementById('formBudget').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const payload = {
+                category: document.getElementById('b-category').value,
+                monthlyLimit: parseFloat(document.getElementById('b-limit').value)
+            };
+            fetch('/api/budgets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json()).then(data => showResult('res-budget', data))
+            .catch(err => showResult('res-budget', 'Error: ' + err));
+        });
+
+        // 5. Check Budget Status
+        document.getElementById('formBudgetStatus').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const category = document.getElementById('bs-category').value;
+            // Text response expected, so we use .text() instead of .json()
+            fetch(`/api/budgets/status?category=${category}`)
+            .then(res => res.text()).then(data => showResult('res-budget-status', data))
+            .catch(err => showResult('res-budget-status', 'Error: ' + err));
+        });
+    </script>
+</body>
+</html>
