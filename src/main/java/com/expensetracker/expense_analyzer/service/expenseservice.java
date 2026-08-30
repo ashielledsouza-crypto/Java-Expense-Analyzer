@@ -62,9 +62,9 @@ public class expenseservice {
         double totalSpent = categoryExpenses.stream().mapToDouble(Transaction::getAmount).sum();
 
         if (totalSpent > budget.getMonthlyLimit()) {
-            return "WARNING: You are over budget by $" + (totalSpent - budget.getMonthlyLimit());
+            return "WARNING: You are over budget by ₹" + (totalSpent - budget.getMonthlyLimit());
         }
-        return "Safe. Remaining balance: $" + (budget.getMonthlyLimit() - totalSpent);
+        return "Safe. Remaining balance: ₹" + (budget.getMonthlyLimit() - totalSpent);
     }
 
 

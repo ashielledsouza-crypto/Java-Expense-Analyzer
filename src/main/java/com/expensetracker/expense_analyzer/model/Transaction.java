@@ -8,55 +8,56 @@ import java.time.LocalDate;
 public class Transaction {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long ID;
-	private String Type;
+	private Long id;
+	private String type;
 	@Positive
-	private double Amount;
-	private String Category;
+	private double amount;
+	private String category;
 	
 	@NotNull
-	private LocalDate Date;
+	private LocalDate date;
 	
-	private String Description;
+	private String description;
 	
 	public Long getId() {
-		return ID;
+		return id;
 	}
-
+	
+	public void setId(Long id) { this.id = id; }
 	
 	public String getType() {
-		return Type;
+		return type;
 	}
 	
 	public void setType(String Type) {
-		this.Type=Type;
+		this.type=Type;
 	}
 	public double getAmount() {
-		return Amount;
+		return amount;
 	}
 	
 	public void setAmount(double Amount) {
-		this.Amount=Amount;
+		this.amount=Amount;
 	}
 	
 	public String getCategory() {
-		return Category;
+		return category;
 	}
 	public void setCategory(String Category) {
-		this.Category=Category;
+		this.category=Category;
 	}
 	
 	public LocalDate getDate() {
-		return Date;
+		return date;
 	}
 	
 	public void setDate(LocalDate Date) {
-		this.Date=Date;
+		this.date=Date;
 	}
 	public String getDescription() {
-		return Description;
+		return description;
 	}
 	public void setDescription(String Description) {
-		this.Description=Description;
+		this.description=Description;
 	}
 }
