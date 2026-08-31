@@ -113,7 +113,14 @@ public class expenseservice {
         }
         return "Error: Transaction not found.";
     }
+    
+    public List<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
+    }
 
+    
+    
+    
     // Update an existing transaction
     public Transaction updateTransaction(Long id, Transaction updatedTx) {
         return transactionRepository.findById(id).map(existingTx -> {
@@ -122,6 +129,8 @@ public class expenseservice {
             existingTx.setCategory(updatedTx.getCategory());
             existingTx.setDate(updatedTx.getDate());
             existingTx.setDescription(updatedTx.getDescription());
+            existingTx.setPaymentMethod(updatedTx.getPaymentMethod());
+
             return transactionRepository.save(existingTx);
         }).orElse(null); // Returns null if the ID doesn't exist
     }

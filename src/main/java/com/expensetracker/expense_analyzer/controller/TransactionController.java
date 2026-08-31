@@ -71,5 +71,9 @@ public class TransactionController {
     public Transaction updateTransaction(@PathVariable Long id, @RequestBody Transaction transaction) {
         return expenseServ.updateTransaction(id, transaction);
     }
+    @GetMapping("/transactions")
+    public List<Transaction> getAllTransactions() {
+        return expenseServ.getAllTransactions(); // Correctly calls the Service
+    }
     
 }

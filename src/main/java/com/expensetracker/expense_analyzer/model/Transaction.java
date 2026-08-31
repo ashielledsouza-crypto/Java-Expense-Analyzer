@@ -16,7 +16,7 @@ public class Transaction {
 	
 	@NotNull
 	private LocalDate date;
-	
+	private String paymentMethod;
 	private String description;
 	
 	public Long getId() {
@@ -60,4 +60,12 @@ public class Transaction {
 	public void setDescription(String Description) {
 		this.description=Description;
 	}
+	public String getPaymentMethod() { 
+	    return paymentMethod; 
+	}
+
+	public void setPaymentMethod(String paymentMethod) { 
+	    this.paymentMethod = paymentMethod; 
+	}
+
 }

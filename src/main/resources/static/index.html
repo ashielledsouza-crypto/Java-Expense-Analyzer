@@ -1,334 +1,352 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker API Dashboard</title>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
-        h1 { text-align: center; color: #333; grid-column: 1 / -1; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h3 { margin-top: 0; color: #0056b3; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
-        input, select, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ced4da; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #0056b3; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background-color: #004494; }
-        .result-box { background: #212529; color: #00ff00; padding: 10px; border-radius: 5px; font-family: monospace; min-height: 40px; white-space: pre-wrap; overflow-x: auto; margin-top: 10px; font-size: 13px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Analyzer</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-alt: #eef4ff;
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;}
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.4rem; }
+    .brand-mark { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; display: grid; place-items: center; box-shadow: var(--shadow); font-size: 1.2rem; }
+    
+    .toolbar { display: flex; gap: 12px; align-items: center; }
+    .pill { border: 1px solid var(--border); background: white; border-radius: 999px; padding: 10px 14px; color: var(--muted); font-size: 0.9rem; font-weight: 600; }
+    
+    .primary-btn, .secondary-btn { border: none; border-radius: 12px; padding: 12px 16px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .primary-btn { background: var(--primary); color: white; box-shadow: 0 10px 16px rgba(59,130,246,0.25); }
+    .primary-btn:hover { background: var(--primary-dark); }
+    .secondary-btn { background: var(--panel-alt); color: var(--primary-dark); }
+    
+    .grid { display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: 22px; }
+    .section-title { margin: 0 0 18px; font-size: 1.1rem; font-weight: 700; }
+    
+    form { display: grid; gap: 14px; }
+    .field { display: grid; gap: 6px; }
+    label { font-size: 0.87rem; font-weight: 600; color: var(--muted); }
+    input, select, textarea { width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font: inherit; outline: none; transition: 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: rgba(59,130,246,0.5); box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+    textarea { min-height: 80px; resize: vertical; }
+    .form-actions { display: flex; gap: 10px; margin-top: 8px; }
+    
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .stat { padding: 18px; border-radius: 18px; border: 1px solid var(--border); background: linear-gradient(180deg, #fff, #f8fbff); }
+    .stat label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .stat .value { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+    .mini { display: inline-block; margin-top: 10px; font-size: 0.82rem; color: var(--success); font-weight: 700; }
+    
+    .filters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 18px; }
+    table { width: 100%; border-collapse: collapse; min-width: 800px; text-align: left; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; font-weight: 700; }
+    tbody tr:hover { background: rgba(59,130,246,0.02); }
+    
+    .category-tag { padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: rgba(59,130,246,0.12); color: var(--primary-dark); }
+    .amount.negative { color: var(--danger); font-weight: 700; }
+    
+    .table-actions { display: flex; gap: 8px; }
+    .small-btn { border: none; cursor: pointer; padding: 7px 10px; border-radius: 8px; font-weight: 600; }
+    .edit-btn { background: rgba(59,130,246,0.12); color: var(--primary-dark); }
+    .delete-btn { background: rgba(239,68,68,0.1); color: var(--danger); }
+    
+    .alert { display: none; margin-top: 14px; padding: 12px; border-radius: 12px; font-size: 0.92rem; font-weight: 600; }
+    .alert.show { display: block; }
+    .alert.success { background: rgba(16,185,129,0.12); color: #047857; }
+    .alert.error { background: rgba(239,68,68,0.12); color: #b91c1c; }
+    
+    @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">₹</div> Expense Analyzer</div>
+      <div class="toolbar">
+        <div class="pill" id="syncStatus">Backend: Checking...</div>
+        <button class="secondary-btn" id="refreshBtn">Refresh Data</button>
+      </div>
+    </header>
 
-    <div class="container">
-        <h1>Backend API Tester</h1>
+    <main class="grid">
+      <section class="panel">
+        <h2 class="section-title" id="formTitle">Add Expense</h2>
+        <form id="expenseForm">
+          <input type="hidden" id="expenseId" />
 
-        <!-- 1. Add Transaction (POST) -->
-        <div class="card">
-            <h3>1. Add Transaction</h3>
-            <form id="formTransaction">
-                <select id="t-type">
-                    <option value="EXPENSE">Expense</option>
-                    <option value="INCOME">Income</option>
-                </select>
-                <input type="number" id="t-amount" placeholder="Amount (e.g., 50.50)" step="0.01" required>
-                <input type="text" id="t-category" placeholder="Category (e.g., Food, Salary)" required>
-                <input type="date" id="t-date" required>
-                <input type="text" id="t-description" placeholder="Description">
-                <button type="submit">POST /api/transactions</button>
-            </form>
-            <div class="result-box" id="res-transaction">Response will appear here...</div>
+          <div class="field">
+            <label>Title</label>
+            <input id="title" type="text" placeholder="e.g. Groceries" required />
+          </div>
+
+          <div class="field">
+            <label>Amount</label>
+            <input id="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+          </div>
+
+          <div class="field">
+            <label>Category</label>
+            <select id="category" required>
+              <option value="">Select a category</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Health">Health</option>
+              <option value="Travel">Travel</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Education">Education</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Payment Method</label>
+            <select id="paymentMethod" required>
+              <option value="Cash">Cash</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="UPI">UPI / Bank Transfer</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Date</label>
+            <input id="date" type="date" required />
+          </div>
+
+          <div class="field">
+            <label>Notes</label>
+            <textarea id="notes" placeholder="Optional details"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="primary-btn" type="submit" id="submitBtn">Save Expense</button>
+            <button class="secondary-btn" type="button" id="cancelEditBtn" style="display:none;">Cancel</button>
+          </div>
+        </form>
+        <div id="formAlert" class="alert"></div>
+      </section>
+
+      <section>
+        <div class="stats">
+          <div class="stat"><label>Total Spent</label><div class="value" id="totalSpent">₹0.00</div><span class="mini">All records</span></div>
+          <div class="stat"><label>Monthly Spend</label><div class="value" id="monthlySpent">₹0.00</div><span class="mini" id="monthLabel">This month</span></div>
+          <div class="stat"><label>Top Category</label><div class="value" id="topCategory">-</div><span class="mini" id="topCategoryValue">₹0.00</span></div>
+          <div class="stat"><label>Average</label><div class="value" id="averageExpense">₹0.00</div><span class="mini">Per expense</span></div>
         </div>
 
-        <!-- 2. Get Cashflow (GET) -->
-        <div class="card">
-            <h3>2. Check Cashflow</h3>
-            <p style="font-size: 14px; color: #666;">Calculates total income, expenses, and savings.</p>
-            <button id="btnCashflow">GET /api/cashflow</button>
-            <div class="result-box" id="res-cashflow">Response will appear here...</div>
+        <div class="panel">
+          <h2 class="section-title">Expense List</h2>
+          <div class="filters">
+            <select id="filterCategory">
+              <option value="all">All categories</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Health">Health</option>
+              <option value="Travel">Travel</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Education">Education</option>
+              <option value="Other">Other</option>
+            </select>
+            <input id="filterMonth" type="month" />
+            <input id="searchInput" type="text" placeholder="Search title or notes" />
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Payment</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTableBody"></tbody>
+            </table>
+          </div>
         </div>
+      </section>
+    </main>
+  </div>
 
-        <!-- 3. Time Travel (GET) -->
-        <div class="card">
-            <h3>3. Time Travel (Filter by Date)</h3>
-            <form id="formTimeTravel">
-                <label style="font-size: 12px; color: #555;">Start Date</label>
-                <input type="date" id="tt-start" required>
-                <label style="font-size: 12px; color: #555;">End Date</label>
-                <input type="date" id="tt-end" required>
-                <button type="submit">GET /api/timetravel</button>
-            </form>
-            <div class="result-box" id="res-timetravel">Response will appear here...</div>
-        </div>
+  <script>
+    const apiBase = '/api/transactions';
+    let expenses = [];
+    const elements = {
+      form: document.getElementById('expenseForm'), title: document.getElementById('title'), amount: document.getElementById('amount'),
+      category: document.getElementById('category'), paymentMethod: document.getElementById('paymentMethod'), date: document.getElementById('date'),
+      notes: document.getElementById('notes'), expenseId: document.getElementById('expenseId'), submitBtn: document.getElementById('submitBtn'),
+      cancelEditBtn: document.getElementById('cancelEditBtn'), formTitle: document.getElementById('formTitle'), formAlert: document.getElementById('formAlert'),
+      tableBody: document.getElementById('expenseTableBody'), filterCategory: document.getElementById('filterCategory'),
+      filterMonth: document.getElementById('filterMonth'), searchInput: document.getElementById('searchInput'), syncStatus: document.getElementById('syncStatus')
+    };
 
-        <!-- 4. Set Budget (POST) -->
-        <div class="card">
-            <h3>4. Set Monthly Budget</h3>
-            <form id="formBudget">
-                <input type="text" id="b-category" placeholder="Category (e.g., Food)" required>
-                <input type="number" id="b-limit" placeholder="Monthly Limit (e.g., 500)" step="0.01" required>
-                <button type="submit">POST /api/budgets</button>
-            </form>
-            <div class="result-box" id="res-budget">Response will appear here...</div>
-        </div>
+    const currency = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val || 0);
 
-        <!-- 5. Check Budget Status (GET) -->
-        <div class="card">
-            <h3>5. Check Budget Status</h3>
-            <form id="formBudgetStatus">
-                <input type="text" id="bs-category" placeholder="Category to check (e.g., Food)" required>
-                <button type="submit">GET /api/budgets/status</button>
-            </form>
-            <div class="result-box" id="res-budget-status">Response will appear here...</div>
-        </div>
+    function showAlert(msg, type = 'success') {
+      elements.formAlert.textContent = msg;
+      elements.formAlert.className = `alert show ${type}`;
+      setTimeout(() => elements.formAlert.className = 'alert', 3000);
+    }
 
-        <!-- 6. Expense Summary (GET) -->
-        <div class="card">
-            <h3>6. Expense Summary</h3>
-            <p style="font-size: 14px; color: #666;">Totals for this month, quarter, and year.</p>
-            <button id="btnSummary">GET /api/expenses/summary</button>
-            <div class="result-box" id="res-summary">Response will appear here...</div>
-        </div>
-        
-        <!-- 7. Visual Cashflow Chart -->
-        <div class="card">
-            <h3>7. Visual Cashflow</h3>
-            <p style="font-size: 14px; color: #666;">Compare Income vs. Expenses.</p>
-            <button id="btnLoadChart">Generate Pie Chart</button>
-            <canvas id="cashflowChart" style="margin-top: 15px; max-height: 300px;"></canvas>
-        </div>
-        
-        <!-- 8. Recent Transactions -->
-        <div class="card">
-            <h3>8. Recent Transactions</h3>
-            <p style="font-size: 14px; color: #666;">View your 5 most recent entries.</p>
-            <button id="btnRecent">GET /api/transactions/recent</button>
-            <div class="result-box" id="res-recent">Response will appear here...</div>
-        </div>
+    function setSyncStatus(online) {
+      elements.syncStatus.textContent = online ? 'Backend: Online' : 'Backend: Offline';
+      elements.syncStatus.style.color = online ? '#047857' : '#b91c1c';
+      elements.syncStatus.style.background = online ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
+    }
 
-        <!-- 9. Update Transaction (PUT) -->
-        <div class="card">
-            <h3>9. Update Transaction</h3>
-            <form id="formUpdate">
-                <input type="number" id="u-id" placeholder="Transaction ID to edit (e.g., 1)" required>
-                <select id="u-type">
-                    <option value="EXPENSE">Expense</option>
-                    <option value="INCOME">Income</option>
-                </select>
-                <input type="number" id="u-amount" placeholder="New Amount" step="0.01" required>
-                <input type="text" id="u-category" placeholder="New Category" required>
-                <input type="date" id="u-date" required>
-                <input type="text" id="u-description" placeholder="New Description">
-                <button type="submit" style="background-color: #ffc107; color: black;">PUT /api/transactions/{id}</button>
-            </form>
-            <div class="result-box" id="res-update">Response will appear here...</div>
-        </div>
+    function normalize(item) {
+      const desc = item.description || 'Untitled';
+      const parts = desc.includes(' | ') ? desc.split(' | ') : [desc, ''];
+      return {
+        id: item.id, title: parts[0], amount: Number(item.amount || 0),
+        category: item.category || 'Other', paymentMethod: item.paymentMethod || 'Cash',
+        date: item.date || '-', notes: parts[1], type: item.type || 'EXPENSE'
+      };
+    }
 
-        <!-- 10. Delete Transaction (DELETE) -->
-        <div class="card">
-            <h3>10. Delete Transaction</h3>
-            <form id="formDelete">
-                <input type="number" id="del-id" placeholder="Transaction ID to delete (e.g., 1)" required>
-                <button type="submit" style="background-color: #dc3545;">DELETE /api/transactions/{id}</button>
-            </form>
-            <div class="result-box" id="res-delete">Response will appear here...</div>
-        </div>
-    </div>
+    function computeSummary(filtered) {
+      const total = filtered.reduce((sum, item) => sum + item.amount, 0);
+      const currMonth = elements.filterMonth.value || new Date().toISOString().slice(0,7);
+      const monthTotal = filtered.filter(i => i.date.startsWith(currMonth)).reduce((sum, item) => sum + item.amount, 0);
+      
+      const catMap = {};
+      filtered.forEach(i => catMap[i.category] = (catMap[i.category] || 0) + i.amount);
+      let topCat = '-', topVal = 0;
+      for (const [cat, val] of Object.entries(catMap)) { if (val > topVal) { topCat = cat; topVal = val; } }
 
-    <script>
-        // Helper function to update the UI
-        function showResult(elementId, data) {
-            const box = document.getElementById(elementId);
-            // Reset styles in case it was modified by the table
-            box.style.background = "#212529";
-            box.style.padding = "10px";
-            box.innerText = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
-        }
+      document.getElementById('totalSpent').textContent = currency(total);
+      document.getElementById('monthlySpent').textContent = currency(monthTotal);
+      document.getElementById('averageExpense').textContent = currency(filtered.length ? total / filtered.length : 0);
+      document.getElementById('topCategory').textContent = topCat;
+      document.getElementById('topCategoryValue').textContent = currency(topVal);
+    }
 
-        // 1. Add Transaction
-        document.getElementById('formTransaction').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const payload = {
-                type: document.getElementById('t-type').value,
-                amount: parseFloat(document.getElementById('t-amount').value),
-                category: document.getElementById('t-category').value,
-                date: document.getElementById('t-date').value,
-                description: document.getElementById('t-description').value
-            };
-            fetch('/api/transactions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json()).then(data => showResult('res-transaction', data))
-            .catch(err => showResult('res-transaction', 'Error: ' + err));
+    function renderTable() {
+      const cat = elements.filterCategory.value;
+      const mon = elements.filterMonth.value;
+      const search = elements.searchInput.value.toLowerCase();
+      
+      const filtered = expenses.filter(i => 
+        (cat === 'all' || i.category === cat) &&
+        (!mon || i.date.startsWith(mon)) &&
+        (!search || `${i.title} ${i.notes}`.toLowerCase().includes(search)) &&
+        (i.type === 'EXPENSE')
+      );
+
+      elements.tableBody.innerHTML = filtered.length ? filtered.map(i => `
+        <tr>
+          <td style="font-weight:600;">${i.title}</td>
+          <td><span class="category-tag">${i.category}</span></td>
+          <td style="font-size:0.85rem; color:#64748b;">${i.paymentMethod}</td>
+          <td>${i.date}</td>
+          <td class="amount negative">${currency(i.amount)}</td>
+          <td style="font-size:0.85rem; color:#64748b;">${i.notes || '-'}</td>
+          <td>
+            <div class="table-actions">
+              <button class="small-btn edit-btn" onclick="editExpense(${i.id})">Edit</button>
+              <button class="small-btn delete-btn" onclick="deleteExpense(${i.id})">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') : `<tr><td colspan="7" style="text-align:center; padding: 20px; color:#64748b;">No expenses found.</td></tr>`;
+      
+      computeSummary(filtered);
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(apiBase);
+        if (!res.ok) throw new Error();
+        expenses = (await res.json()).map(normalize);
+        setSyncStatus(true);
+        renderTable();
+      } catch (e) {
+        expenses = [];
+        setSyncStatus(false);
+        renderTable();
+      }
+    }
+
+    elements.form.onsubmit = async (e) => {
+      e.preventDefault();
+      const payload = {
+        type: "EXPENSE", amount: Number(elements.amount.value), category: elements.category.value,
+        paymentMethod: elements.paymentMethod.value, date: elements.date.value,
+        description: elements.title.value.trim() + (elements.notes.value.trim() ? " | " + elements.notes.value.trim() : "")
+      };
+      
+      const id = elements.expenseId.value;
+      try {
+        const res = await fetch(id ? `${apiBase}/${id}` : apiBase, {
+          method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
         });
+        if (!res.ok) throw new Error('Failed to save to database');
+        resetForm();
+        showAlert('Saved successfully!');
+        loadData();
+      } catch (err) { showAlert(err.message, 'error'); }
+    };
 
-        // 2. Cashflow
-        document.getElementById('btnCashflow').addEventListener('click', function() {
-            fetch('/api/cashflow')
-            .then(res => res.json()).then(data => showResult('res-cashflow', data))
-            .catch(err => showResult('res-cashflow', 'Error: ' + err));
-        });
+    window.deleteExpense = async (id) => {
+      if (!confirm('Delete this expense?')) return;
+      try {
+        const res = await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        showAlert('Deleted successfully!');
+        loadData();
+      } catch (err) { showAlert(err.message, 'error'); }
+    };
 
-        // 3. Time Travel
-        document.getElementById('formTimeTravel').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const start = document.getElementById('tt-start').value;
-            const end = document.getElementById('tt-end').value;
-            fetch(`/api/timetravel?start=${start}&end=${end}`)
-            .then(res => res.json()).then(data => showResult('res-timetravel', data))
-            .catch(err => showResult('res-timetravel', 'Error: ' + err));
-        });
+    window.editExpense = (id) => {
+      const item = expenses.find(i => i.id === id);
+      if (!item) return;
+      elements.expenseId.value = item.id; elements.title.value = item.title; elements.amount.value = item.amount;
+      elements.category.value = item.category; elements.paymentMethod.value = item.paymentMethod;
+      elements.date.value = item.date; elements.notes.value = item.notes;
+      elements.formTitle.textContent = 'Edit Expense'; elements.submitBtn.textContent = 'Update';
+      elements.cancelEditBtn.style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-        // 4. Set Budget
-        document.getElementById('formBudget').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const payload = {
-                category: document.getElementById('b-category').value,
-                monthlyLimit: parseFloat(document.getElementById('b-limit').value)
-            };
-            fetch('/api/budgets', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json()).then(data => showResult('res-budget', data))
-            .catch(err => showResult('res-budget', 'Error: ' + err));
-        });
+    function resetForm() {
+      elements.form.reset(); elements.expenseId.value = ''; elements.date.value = new Date().toISOString().slice(0,10);
+      elements.formTitle.textContent = 'Add Expense'; elements.submitBtn.textContent = 'Save Expense';
+      elements.cancelEditBtn.style.display = 'none';
+    }
 
-        // 5. Check Budget Status
-        document.getElementById('formBudgetStatus').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const category = document.getElementById('bs-category').value;
-            fetch(`/api/budgets/status?category=${category}`)
-            .then(res => res.text()).then(data => showResult('res-budget-status', data))
-            .catch(err => showResult('res-budget-status', 'Error: ' + err));
-        });
-
-        // 6. Expense Summary
-        document.getElementById('btnSummary').addEventListener('click', function() {
-            fetch('/api/expenses/summary')
-            .then(res => res.json()).then(data => showResult('res-summary', data))
-            .catch(err => showResult('res-summary', 'Error: ' + err));
-        });
-
-        // 7. Render Chart.js Pie Chart
-        let cashflowChartInstance = null;
-
-        document.getElementById('btnLoadChart').addEventListener('click', function() {
-            fetch('/api/cashflow')
-            .then(res => res.json())
-            .then(data => {
-                const ctx = document.getElementById('cashflowChart').getContext('2d');
-                
-                if (cashflowChartInstance != null) {
-                    cashflowChartInstance.destroy();
-                }
-
-                cashflowChartInstance = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Total Income', 'Total Expense'],
-                        datasets: [{
-                            data: [data['Total Income'] || 0, data['Total Expense'] || 0],
-                            backgroundColor: ['#28a745', '#dc3545'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { position: 'bottom' } }
-                    }
-                });
-            })
-            .catch(err => alert('Error loading chart: ' + err));
-        });
-        
-        // 8. Recent Transactions (Formatted as Table)
-        document.getElementById('btnRecent').addEventListener('click', function() {
-            fetch('/api/transactions/recent')
-            .then(res => res.json())
-            .then(data => {
-                const resBox = document.getElementById('res-recent');
-                
-                if (data.length === 0) {
-                    // Using helper function to reset styles and show text
-                    showResult('res-recent', "No recent transactions found.");
-                    return;
-                }
-
-                // Start building the HTML table
-                let tableHtml = `
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 5px; background: white; color: black; font-family: sans-serif; font-size: 14px;">
-                        <tr style="background-color: #0056b3; color: white; text-align: left;">
-                            <th style="padding: 8px; border: 1px solid #ccc;">ID</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Type</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Date</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Category</th>
-                            <th style="padding: 8px; border: 1px solid #ccc;">Amount</th>
-                        </tr>
-                `;
-
-                // Loop through each transaction and create a row
-                data.forEach(tx => {
-                    // Make expenses red and income green
-                    let typeColor = tx.type === 'EXPENSE' ? '#dc3545' : '#28a745';
-                    
-                    tableHtml += `
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ccc;">${tx.id}</td>
-                            <td style="padding: 8px; border: 1px solid #ccc; color: ${typeColor}; font-weight: bold;">${tx.type}</td>
-                            <td style="padding: 8px; border: 1px solid #ccc;">${tx.date}</td>
-                            <td style="padding: 8px; border: 1px solid #ccc;">${tx.category}</td>
-                            <td style="padding: 8px; border: 1px solid #ccc;">$${tx.amount.toFixed(2)}</td>
-                        </tr>
-                    `;
-                });
-
-                tableHtml += `</table>`;
-                
-                // Override the dark terminal style to display the white table
-                resBox.style.background = "transparent";
-                resBox.style.padding = "0";
-                resBox.innerHTML = tableHtml;
-            })
-            .catch(err => showResult('res-recent', 'Error: ' + err));
-        });
-
-        // 9. Update Transaction
-        document.getElementById('formUpdate').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const id = document.getElementById('u-id').value;
-            const payload = {
-                type: document.getElementById('u-type').value,
-                amount: parseFloat(document.getElementById('u-amount').value),
-                category: document.getElementById('u-category').value,
-                date: document.getElementById('u-date').value,
-                description: document.getElementById('u-description').value
-            };
-            fetch(`/api/transactions/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.text()) 
-            .then(data => {
-                try { showResult('res-update', JSON.parse(data)); } 
-                catch { showResult('res-update', data); }
-            })
-            .catch(err => showResult('res-update', 'Error: ' + err));
-        });
-
-        // 10. Delete Transaction
-        document.getElementById('formDelete').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const id = document.getElementById('del-id').value;
-            fetch(`/api/transactions/${id}`, { method: 'DELETE' })
-            .then(res => res.text())
-            .then(data => showResult('res-delete', data))
-            .catch(err => showResult('res-delete', 'Error: ' + err));
-        });
-    </script>
+    elements.cancelEditBtn.onclick = resetForm;
+    document.getElementById('refreshBtn').onclick = loadData;
+    ['filterCategory', 'filterMonth', 'searchInput'].forEach(id => document.getElementById(id).oninput = renderTable);
+    
+    elements.date.value = new Date().toISOString().slice(0, 10);
+    elements.filterMonth.value = new Date().toISOString().slice(0, 7);
+    loadData();
+  </script>
 </body>
 </html>
