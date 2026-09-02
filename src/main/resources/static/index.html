@@ -195,7 +195,7 @@
           <canvas id="categoryChart"></canvas>
         </article>
         <article class="panel">
-          <div class="panel-header"><div><span class="section-label">Variance Analysis</span><h3>Spending vs Average</h3></div></div>
+          <div class="panel-header"><div><span class="section-label">Variance Analysis</span><h3>Spend vs Budget</h3></div></div>
           <div id="varianceList" class="variance-list"></div>
         </article>
       </section>
@@ -304,7 +304,6 @@
     <script>
       const apiBase = "/api/transactions";
 
-      // 0 default budgets
       const defaultBudgets = { Housing: 0, Food: 0, Travel: 0, Bills: 0, Leisure: 0, Other: 0 };
       
       const state = {
@@ -314,7 +313,6 @@
       };
 
       function loadBudgetData() {
-        // Changed the key to _v2 to force a wipe of any old dummy data stuck in your browser
         const saved = localStorage.getItem("smartFinanceBudgets_v2");
         return saved ? { ...defaultBudgets, ...JSON.parse(saved) } : { ...defaultBudgets };
       }
@@ -374,7 +372,6 @@
             expenseData.push(state.transactions.filter(t => t.type === "expense" && new Date(t.date).toDateString() === d.toDateString()).reduce((s, t) => s + t.amount, 0));
           }
         } else if (range === "monthly") {
-          // FIX: Uses exact Month/Year matching to avoid Javascript timezone cutoff bugs at the end of the month
           for (let i = 5; i >= 0; i--) {
             const d = new Date(); d.setMonth(d.getMonth() - i);
             labels.push(monthNames[d.getMonth()]);
@@ -412,20 +409,23 @@
         return { labels, incomeData, expenseData };
       }
 
-      function getCategoryExpenseBreakdown() {
-        const categories = Object.keys(defaultBudgets);
-        return categories.map(category => ({
-          category,
-          total: state.transactions.filter(t => t.type === "expense" && t.category === category).reduce((sum, item) => sum + item.amount, 0)
-        }));
-      }
-
       function getVarianceList() {
-        const items = getCategoryExpenseBreakdown();
-        const avg = items.reduce((sum, item) => sum + item.total, 0) / (items.length || 1);
-        return items.map(item => {
-          const diff = item.total - avg;
-          return { category: item.category, delta: Math.abs(Math.round(diff)), direction: diff >= 0 ? "up" : "down" };
+        const categories = Object.keys(defaultBudgets);
+        
+        return categories.map(category => {
+          const spent = state.transactions
+            .filter(t => t.type === "expense" && t.category === category)
+            .reduce((sum, item) => sum + item.amount, 0);
+
+          const budget = state.budgets[category] || 0;
+          const diff = spent - budget;
+
+          return { 
+            category: category, 
+            delta: Math.abs(diff), 
+            direction: diff > 0 ? "up" : "down",
+            budgetIsZero: budget === 0
+          };
         });
       }
 
@@ -468,9 +468,13 @@
       }
 
       function renderCategoryChart() {
-        const data = getCategoryExpenseBreakdown();
+        const categories = Object.keys(defaultBudgets);
+        const data = categories.map(category => ({
+          category,
+          total: state.transactions.filter(t => t.type === "expense" && t.category === category).reduce((sum, item) => sum + item.amount, 0)
+        }));
+
         const chartCtx = document.getElementById("categoryChart");
-        
         if (window.catChartInstance) window.catChartInstance.destroy();
         
         window.catChartInstance = new Chart(chartCtx, {
@@ -482,13 +486,32 @@
 
       function renderVarianceList() {
         const variance = getVarianceList();
-        document.getElementById("varianceList").innerHTML = variance.map(item => `
-          <div class="variance-item">
-            <div class="label">${item.category}</div>
-            <div class="delta ${item.direction === "up" ? "up" : "down"}">${item.direction === "up" ? "▲" : "▼"} ₹${item.delta}</div>
-            <div class="label">${item.direction === "up" ? "Above avg" : "Below avg"}</div>
-          </div>
-        `).join("");
+        
+        document.getElementById("varianceList").innerHTML = variance.map(item => {
+          
+          if (item.budgetIsZero && item.delta === 0) {
+            return `<div class="variance-item">
+                      <div class="label">${item.category}</div>
+                      <div class="label" style="grid-column: span 2; text-align: right;">No budget set</div>
+                    </div>`;
+          }
+          
+          if (item.budgetIsZero && item.delta > 0) {
+            return `<div class="variance-item">
+                <div class="label">${item.category}</div>
+                <div class="delta down">₹${item.delta}</div>
+                <div class="label">No budget set</div>
+              </div>`;
+          }
+          
+          return `<div class="variance-item">
+              <div class="label">${item.category}</div>
+              <div class="delta ${item.direction === "up" ? "down" : "up"}">
+                ${item.direction === "up" ? "▲" : "▼"} ₹${item.delta}
+              </div>
+              <div class="label">${item.direction === "up" ? "Over budget" : "Under budget"}</div>
+            </div>`;
+        }).join("");
       }
 
       function renderTransactions() {
