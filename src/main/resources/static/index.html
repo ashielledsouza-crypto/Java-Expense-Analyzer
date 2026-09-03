@@ -37,25 +37,19 @@
       .hero h2 { margin-top: 18px; font-size: clamp(2.2rem, 4vw, 4.2rem); line-height: 1.02; letter-spacing: -0.06em; }
       .hero p { margin-top: 16px; max-width: 560px; color: var(--muted); line-height: 1.7; font-size: 1.02rem; }
       .hero-actions { margin-top: 24px; display: flex; gap: 14px; }
-      .mini-stats { margin-top: 30px; display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 18px; }
-      .mini-stat { padding: 16px 18px; border-radius: 18px; background: rgba(126, 247, 188, 0.03); border: 1px solid var(--line); }
-      .mini-stat span { display: block; color: var(--muted); margin-bottom: 7px; font-size: 0.76rem; }
-      .mini-stat strong { font-size: 1.15rem; }
       .hero-visual { position: relative; display: flex; justify-content: center; align-items: center; min-height: 420px; }
       .photo-card { width: min(100%, 520px); overflow: hidden; border-radius: 28px; border: 1px solid rgba(126, 247, 188, 0.2); box-shadow: var(--shadow); }
       .photo-card img { width: 100%; height: 430px; object-fit: cover; display: block; filter: saturate(0.85) contrast(1.02); }
-      .floating-card { position: absolute; padding: 14px 16px; min-width: 170px; background: rgba(8, 22, 18, 0.9); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
-      .floating-card span { display: block; color: var(--muted); margin-bottom: 6px; }
-      .floating-card strong { font-size: 1.35rem; }
-      .floating-card small { color: var(--muted); }
-      .card-a { left: 8px; bottom: 30px; }
-      .card-b { right: 8px; top: 20px; }
-      .stats-grid { margin-top: 28px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+      .stats-header { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; }
+      .stats-header h3 { margin: 0; color: var(--muted); font-size: 0.95rem; letter-spacing: 0.05em; text-transform: uppercase; }
+      .range-select { padding: 8px 14px; border-radius: 10px; background: rgba(10, 22, 18, 0.9); color: var(--text); border: 1px solid rgba(126, 247, 188, 0.18); outline: none; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 500; transition: border-color 0.2s ease; }
+      .range-select:focus { border-color: var(--accent); }
+      .stats-grid { margin-top: 16px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
       .stat-card, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); }
-      .stat-card { display: flex; align-items: center; gap: 14px; padding: 20px 18px; }
+      .stat-card { display: flex; align-items: center; gap: 14px; padding: 20px 18px; transition: transform 0.2s ease; }
       .stat-card.accent { background: linear-gradient(135deg, rgba(126, 247, 188, 0.06), rgba(14, 30, 25, 0.95)); }
-      .stat-icon { width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center; background: rgba(126, 247, 188, 0.09); font-size: 1.5rem; }
-      .stat-card span { display: block; color: var(--muted); margin-bottom: 8px; }
+      .stat-icon { width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center; background: rgba(126, 247, 188, 0.09); font-size: 1.5rem; flex-shrink: 0; }
+      .stat-card span { display: block; color: var(--muted); margin-bottom: 8px; font-size: 0.85rem; }
       .stat-card h3 { font-size: clamp(1.2rem, 2vw, 1.8rem); margin: 0; }
       .content-grid { margin-top: 26px; display: grid; grid-template-columns: 1.7fr 0.9fr; gap: 22px; }
       .panel { padding: 22px; }
@@ -63,22 +57,14 @@
       .section-label { display: block; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 8px; }
       .panel-header h3 { margin: 0; }
       .segmented { display: inline-flex; gap: 4px; background: rgba(126, 247, 188, 0.03); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
-      .segmented button { border: none; background: transparent; color: var(--muted); padding: 10px 14px; border-radius: 9px; cursor: pointer; }
+      .segmented button { border: none; background: transparent; color: var(--muted); padding: 10px 14px; border-radius: 99px; cursor: pointer; }
       .segmented button.active { color: var(--text); background: rgba(126, 247, 188, 0.12); }
       .gauge-wrap { display: grid; place-items: center; margin-top: 10px; }
-      
-      .gauge-ring { 
-        --value: 0; 
-        --ring-color: var(--accent);
-        width: 220px; height: 220px; border-radius: 50%; 
-        background: conic-gradient(var(--ring-color) calc(var(--value) * 1%), rgba(255,255,255,0.06) 0); 
-        display: grid; place-items: center; position: relative; box-shadow: inset 0 0 30px rgba(126, 247, 188, 0.12); 
-      }
+      .gauge-ring { --value: 0; --ring-color: var(--accent); width: 220px; height: 220px; border-radius: 50%; background: conic-gradient(var(--ring-color) calc(var(--value) * 1%), rgba(255,255,255,0.06) 0); display: grid; place-items: center; position: relative; box-shadow: inset 0 0 30px rgba(126, 247, 188, 0.12); }
       .gauge-ring::before { content: ""; position: absolute; inset: 18px; border-radius: 50%; background: #091812; border: 1px solid var(--line); }
       .gauge-center { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
       .gauge-center strong { font-size: 2rem; transition: color 0.3s ease; }
       .gauge-center span { color: var(--muted); }
-      
       .gauge-legend { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; color: var(--muted); }
       .gauge-legend div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
       .dot { width: 10px; height: 10px; display: inline-block; border-radius: 50%; margin-right: 8px; }
@@ -86,14 +72,11 @@
       .dot.expense { background: var(--danger); }
       .variance-list { display: flex; flex-direction: column; gap: 12px; }
       .variance-item { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; background: rgba(126, 247, 188, 0.03); border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px; }
-      .variance-item .label { color: var(--muted); }
-      .delta { font-weight: 700; }
+      .variance-item .label { color: var(--muted); font-size: 0.9rem; }
+      .delta { font-weight: 700; font-size: 0.95rem; }
       .delta.up { color: var(--accent); }
       .delta.down { color: var(--danger); }
-      
-      /* FIXED: Controlled Chart Container prevents the freeze! */
       .chart-container { position: relative; width: 100%; height: 330px; }
-      
       .forms-grid { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
       .form-card { padding: 22px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); }
       form { display: flex; flex-direction: column; gap: 14px; }
@@ -104,7 +87,6 @@
       .field input:focus, .field select:focus { border-color: rgba(126, 247, 188, 0.42); }
       select, option { background: #0d1d18; color: var(--text); }
       .submit-btn { border: none; padding: 12px 16px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #052d1d; font-weight: 800; cursor: pointer; }
-      .reset-btn { border: 1px solid var(--line); background: rgba(255,255,255,0.02); color: var(--text); padding: 12px 16px; border-radius: 12px; cursor: pointer; }
       .table-card { margin-top: 26px; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: 22px; }
       .table-wrap { overflow-x: auto; }
       table { width: 100%; border-collapse: collapse; min-width: 800px; }
@@ -113,10 +95,9 @@
       .type-pill { display: inline-flex; border-radius: 999px; padding: 6px 10px; font-size: 0.72rem; font-weight: 700; }
       .type-pill.income { background: rgba(126, 247, 188, 0.12); color: var(--accent); }
       .type-pill.expense { background: rgba(255, 127, 140, 0.12); color: #ffb3bc; }
-      .del-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: 700; }
-      .del-budget-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: 700; }
+      .del-btn, .del-budget-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: 700; }
       @media (max-width: 1100px) { .hero, .content-grid, .forms-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-      @media (max-width: 760px) { .topbar { flex-wrap: wrap; justify-content: center; } .nav { width: 100%; justify-content: center; flex-wrap: wrap; } .hero { padding: 20px 18px; } .hero h2 { font-size: 2.5rem; } .mini-stats, .stats-grid { grid-template-columns: 1fr; } .hero-actions { flex-wrap: wrap; } .panel-header { flex-direction: column; align-items: flex-start; } }
+      @media (max-width: 760px) { .topbar { flex-wrap: wrap; justify-content: center; } .nav { width: 100%; justify-content: center; flex-wrap: wrap; } .hero { padding: 20px 18px; } .hero h2 { font-size: 2.5rem; } .stats-grid { grid-template-columns: 1fr; } .hero-actions { flex-wrap: wrap; } .panel-header { flex-direction: column; align-items: flex-start; } }
     </style>
   </head>
   <body>
@@ -147,30 +128,47 @@
             <button class="btn-primary" id="viewTrendsBtn">View Trends</button>
             <button class="btn-secondary" id="setBudgetBtn">Set Budget</button>
           </div>
-          <div class="mini-stats">
-            <div class="mini-stat"><span>Monthly Income</span><strong id="hero-income">₹0</strong></div>
-            <div class="mini-stat"><span>Monthly Expense</span><strong id="hero-expense">₹0</strong></div>
-            <div class="mini-stat"><span>Monthly Savings</span><strong id="hero-savings">₹0</strong></div>
-          </div>
         </div>
         <div class="hero-visual">
           <div class="photo-card">
             <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=900&q=80" alt="Finance dashboard" />
           </div>
-          <div class="floating-card card-a">
-            <span>Net Savings</span><strong id="net-savings">₹0</strong><small id="savings-growth">Live from Database</small>
-          </div>
-          <div class="floating-card card-b">
-            <span>Budget Used</span><strong id="budget-used">0.00%</strong>
-          </div>
         </div>
       </section>
 
+      <div class="stats-header">
+        <h3>Summary Statistics</h3>
+        <select id="overviewRange" class="range-select">
+          <option value="monthly" selected>This Month</option>
+          <option value="quarterly">This Quarter</option>
+          <option value="yearly">This Year</option>
+        </select>
+      </div>
+
       <section class="stats-grid">
-        <article class="stat-card accent"><div class="stat-icon">📈</div><div><span>Monthly Income</span><h3 id="sum-income">₹0</h3></div></article>
-        <article class="stat-card"><div class="stat-icon">📉</div><div><span>Monthly Expense</span><h3 id="sum-expense">₹0</h3></div></article>
-        <article class="stat-card"><div class="stat-icon">💰</div><div><span>Monthly Saved</span><h3 id="sum-saved">₹0</h3></div></article>
-        <article class="stat-card"><div class="stat-icon">🎯</div><div><span>Budget Left</span><h3 id="budget-left">₹0</h3></div></article>
+        <article class="stat-card accent"><div class="stat-icon">📈</div><div><span id="label-income">Monthly Income</span><h3 id="sum-income">₹0</h3></div></article>
+        <article class="stat-card"><div class="stat-icon">📉</div><div><span id="label-expense">Monthly Expense</span><h3 id="sum-expense">₹0</h3></div></article>
+        <article class="stat-card"><div class="stat-icon">💰</div><div><span id="label-saved">Monthly Saved</span><h3 id="sum-saved">₹0</h3></div></article>
+
+        <!-- Dynamic Category Selector strictly for Budget Left Card -->
+        <article class="stat-card" style="justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div class="stat-icon">🎯</div>
+            <div>
+              <span id="label-budget">Monthly Budget Left</span>
+              <h3 id="budget-left">₹0</h3>
+            </div>
+          </div>
+          <select id="budgetCardCategory" class="range-select" style="padding: 4px 8px; font-size: 0.75rem;">
+            <option value="ALL" selected>All</option>
+            <option value="Housing">Housing</option>
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Bills">Bills</option>
+            <option value="Leisure">Leisure</option>
+            <option value="Other">Other</option>
+          </select>
+        </article>
       </section>
 
       <section class="content-grid" id="budget">
@@ -184,15 +182,13 @@
               <button data-range="yearly">Yearly</button>
             </div>
           </div>
-          
           <div class="chart-container">
             <canvas id="budgetChart"></canvas>
           </div>
-
         </article>
 
         <article class="panel">
-          <div class="panel-header"><div><span class="section-label">Financial Balance (Current Month)</span><h3>Income vs Expense</h3></div></div>
+          <div class="panel-header"><div><span class="section-label">Financial Balance</span><h3>Income vs Expense</h3></div></div>
           <div class="gauge-wrap">
             <div class="gauge-ring" id="gaugeRing">
               <div class="gauge-center"><strong id="gaugeValue">0.00%</strong><span>Spent</span></div>
@@ -207,15 +203,13 @@
 
       <section class="content-grid" id="insights" style="margin-top: 26px;">
         <article class="panel">
-          <div class="panel-header"><div><span class="section-label">Breakdown (Current Month)</span><h3>Category Allocation</h3></div></div>
-          
+          <div class="panel-header"><div><span class="section-label">Breakdown</span><h3>Category Allocation</h3></div></div>
           <div class="chart-container">
             <canvas id="categoryChart"></canvas>
           </div>
-          
         </article>
         <article class="panel">
-          <div class="panel-header"><div><span class="section-label">Variance Analysis (Current Month)</span><h3>Spend vs Budget</h3></div></div>
+          <div class="panel-header"><div><span class="section-label">Variance Analysis</span><h3>Spend vs Budget</h3></div></div>
           <div id="varianceList" class="variance-list"></div>
         </article>
       </section>
@@ -237,7 +231,7 @@
               </select>
             </div>
             <div class="field">
-              <label for="budgetAmount">Budget Amount</label>
+              <label for="budgetAmount">Monthly Budget Limit</label>
               <input id="budgetAmount" type="number" min="1" step="1" placeholder="Enter budget" required />
             </div>
             <button class="submit-btn" type="submit">Update DB Budget</button>
@@ -249,7 +243,7 @@
               <thead>
                 <tr>
                   <th>Category</th>
-                  <th>Amount</th>
+                  <th>Limit (Monthly)</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -265,7 +259,6 @@
               <label for="entryTitle">Title / Description</label>
               <input id="entryTitle" type="text" placeholder="e.g. Groceries" required />
             </div>
-
             <div class="field">
               <label for="entryType">Type</label>
               <select id="entryType">
@@ -273,13 +266,10 @@
                 <option value="EXPENSE" selected>Expense</option>
               </select>
             </div>
-
             <div class="field">
               <label for="entryCategory">Category</label>
-              <select id="entryCategory">
-                </select>
+              <select id="entryCategory"></select>
             </div>
-            
             <div class="field">
               <label for="entryPayment">Payment Method</label>
               <select id="entryPayment">
@@ -289,17 +279,14 @@
                 <option value="UPI">UPI</option>
               </select>
             </div>
-
             <div class="field">
               <label for="entryAmount">Amount</label>
               <input id="entryAmount" type="number" min="1" step="1" placeholder="Amount" required />
             </div>
-
             <div class="field">
               <label for="entryDate">Date</label>
               <input id="entryDate" type="date" required />
             </div>
-
             <button class="submit-btn" type="submit">Save to Database</button>
           </form>
         </div>
@@ -340,7 +327,8 @@
       };
 
       const state = {
-        range: "monthly",
+        chartRange: "monthly", 
+        overviewRange: "monthly",
         budgets: { ...defaultBudgets },
         transactions: [] 
       };
@@ -348,13 +336,8 @@
       function updateCategoryDropdown() {
         const typeSelect = document.getElementById("entryType");
         const categorySelect = document.getElementById("entryCategory");
-        const selectedType = typeSelect.value;
-
-        const availableCategories = categoryOptions[selectedType] || [];
-
-        categorySelect.innerHTML = availableCategories
-          .map(cat => `<option value="${cat}">${cat}</option>`)
-          .join("");
+        const availableCategories = categoryOptions[typeSelect.value] || [];
+        categorySelect.innerHTML = availableCategories.map(cat => `<option value="${cat}">${cat}</option>`).join("");
       }
 
       function isCurrentMonth(dateString) {
@@ -364,13 +347,34 @@
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       }
 
+      function isCurrentQuarter(dateString) {
+        if (!dateString) return false;
+        const d = new Date(dateString);
+        const now = new Date();
+        const currentQuarter = Math.floor(now.getMonth() / 3);
+        const dateQuarter = Math.floor(d.getMonth() / 3);
+        return d.getFullYear() === now.getFullYear() && currentQuarter === dateQuarter;
+      }
+
+      function isCurrentYear(dateString) {
+        if (!dateString) return false;
+        const d = new Date(dateString);
+        const now = new Date();
+        return d.getFullYear() === now.getFullYear();
+      }
+
+      function isInSelectedRange(dateString) {
+        if (state.overviewRange === 'monthly') return isCurrentMonth(dateString);
+        if (state.overviewRange === 'quarterly') return isCurrentQuarter(dateString);
+        if (state.overviewRange === 'yearly') return isCurrentYear(dateString);
+        return true;
+      }
+
       async function fetchBudgets() {
         try {
           const response = await fetch(budgetApiBase);
           if (!response.ok) throw new Error("Budget DB offline");
-          
           const data = await response.json();
-          
           Object.keys(defaultBudgets).forEach(k => state.budgets[k] = 0);
           data.forEach(b => {
              if (state.budgets[b.category] !== undefined) {
@@ -387,7 +391,6 @@
         statusText.textContent = "Syncing...";
         try {
             await fetchBudgets(); 
-
             const response = await fetch(txApiBase);
             if (!response.ok) throw new Error("Backend offline");
             const data = await response.json();
@@ -419,15 +422,11 @@
       }
 
       function getTotalIncome() { 
-        return state.transactions
-          .filter(t => t.type === "income" && isCurrentMonth(t.date))
-          .reduce((sum, t) => sum + t.amount, 0); 
+        return state.transactions.filter(t => t.type === "income" && isInSelectedRange(t.date)).reduce((sum, t) => sum + t.amount, 0); 
       }
       
       function getTotalExpense() { 
-        return state.transactions
-          .filter(t => t.type === "expense" && isCurrentMonth(t.date))
-          .reduce((sum, t) => sum + t.amount, 0); 
+        return state.transactions.filter(t => t.type === "expense" && isInSelectedRange(t.date)).reduce((sum, t) => sum + t.amount, 0); 
       }
       
       function getBudgetTotal() { 
@@ -450,19 +449,15 @@
           for (let i = 5; i >= 0; i--) {
             const d = new Date(); d.setMonth(d.getMonth() - i);
             labels.push(monthNames[d.getMonth()]);
-            
-            const targetYear = d.getFullYear();
-            const targetMonth = d.getMonth();
-
-            incomeData.push(state.transactions.filter(t => t.type === "income" && new Date(t.date).getFullYear() === targetYear && new Date(t.date).getMonth() === targetMonth).reduce((s, t) => s + t.amount, 0));
-            expenseData.push(state.transactions.filter(t => t.type === "expense" && new Date(t.date).getFullYear() === targetYear && new Date(t.date).getMonth() === targetMonth).reduce((s, t) => s + t.amount, 0));
+            incomeData.push(state.transactions.filter(t => t.type === "income" && new Date(t.date).getFullYear() === d.getFullYear() && new Date(t.date).getMonth() === d.getMonth()).reduce((s, t) => s + t.amount, 0));
+            expenseData.push(state.transactions.filter(t => t.type === "expense" && new Date(t.date).getFullYear() === d.getFullYear() && new Date(t.date).getMonth() === d.getMonth()).reduce((s, t) => s + t.amount, 0));
           }
         } else if (range === "quarterly") {
           const quarters = ["Q1", "Q2", "Q3", "Q4"];
           for (let i = 0; i < 4; i++) {
             labels.push(quarters[i]);
-            incomeData.push(state.transactions.filter(t => t.type === "income" && new Date(t.date).getMonth() >= (i*3) && new Date(t.date).getMonth() <= (i*3)+2).reduce((s, t) => s + t.amount, 0));
-            expenseData.push(state.transactions.filter(t => t.type === "expense" && new Date(t.date).getMonth() >= (i*3) && new Date(t.date).getMonth() <= (i*3)+2).reduce((s, t) => s + t.amount, 0));
+            incomeData.push(state.transactions.filter(t => t.type === "income" && Math.floor(new Date(t.date).getMonth() / 3) === i).reduce((s, t) => s + t.amount, 0));
+            expenseData.push(state.transactions.filter(t => t.type === "expense" && Math.floor(new Date(t.date).getMonth() / 3) === i).reduce((s, t) => s + t.amount, 0));
           }
         } else {
           const years = [2022, 2023, 2024, 2025, 2026];
@@ -475,9 +470,9 @@
         return { labels, incomeData, expenseData };
       }
 
+      // Variance list is strictly locked to Current Month
       function getVarianceList() {
         const categories = Object.keys(state.budgets);
-        
         return categories.map(category => {
           const spent = state.transactions
             .filter(t => t.type === "expense" && t.category === category && isCurrentMonth(t.date))
@@ -496,23 +491,45 @@
       }
 
       function renderOverview() {
-        const totalIncome = getTotalIncome(), totalExpense = getTotalExpense();
-        const savings = totalIncome - totalExpense, budgetTotal = getBudgetTotal();
+        const totalIncome = getTotalIncome();
+        const totalExpense = getTotalExpense();
+        const savings = totalIncome - totalExpense;
 
-        document.getElementById("hero-income").textContent = formatCurrency(totalIncome);
-        document.getElementById("hero-expense").textContent = formatCurrency(totalExpense);
-        document.getElementById("hero-savings").textContent = formatCurrency(savings);
+        // Calculate card 4 value based on card 4's specific dropdown
+        const selectedCat = document.getElementById("budgetCardCategory") ? document.getElementById("budgetCardCategory").value : "ALL";
+        let targetBudget = 0;
+        let targetExpense = 0;
+
+        if (selectedCat === "ALL") {
+          targetBudget = getBudgetTotal();
+          targetExpense = state.transactions
+            .filter(t => t.type === "expense" && isCurrentMonth(t.date))
+            .reduce((sum, t) => sum + t.amount, 0);
+        } else {
+          targetBudget = state.budgets[selectedCat] || 0;
+          targetExpense = state.transactions
+            .filter(t => t.type === "expense" && t.category === selectedCat && isCurrentMonth(t.date))
+            .reduce((sum, t) => sum + t.amount, 0);
+        }
+
+        const monthlyBudgetLeft = Math.max(targetBudget - targetExpense, 0);
+
+        // Dynamic labels for 1-3, strictly static for 4
+        const prefix = state.overviewRange === 'monthly' ? 'Monthly' : state.overviewRange === 'quarterly' ? 'Quarterly' : 'Yearly';
+        document.getElementById("label-income").textContent = `${prefix} Income`;
+        document.getElementById("label-expense").textContent = `${prefix} Expense`;
+        document.getElementById("label-saved").textContent = `${prefix} Saved`;
+        document.getElementById("label-budget").textContent = `Monthly Budget Left`; 
+
+        // Update values
         document.getElementById("sum-income").textContent = formatCurrency(totalIncome);
         document.getElementById("sum-expense").textContent = formatCurrency(totalExpense);
         document.getElementById("sum-saved").textContent = formatCurrency(savings);
-        document.getElementById("budget-left").textContent = formatCurrency(Math.max(budgetTotal - totalExpense, 0));
+        document.getElementById("budget-left").textContent = formatCurrency(monthlyBudgetLeft);
 
-        const budgetUsed = budgetTotal === 0 ? 0 : (totalExpense / budgetTotal) * 100;
-        document.getElementById("budget-used").textContent = budgetUsed.toFixed(2) + "%";
-
+        // Gauge Math
         let percentSpentText = "0.00%";
         let numericPercent = 0;
-
         if (totalIncome > 0) {
             numericPercent = (totalExpense / totalIncome) * 100;
             percentSpentText = numericPercent.toFixed(2) + "%";
@@ -522,7 +539,6 @@
         }
         
         const visualRing = Math.min(numericPercent, 100); 
-        
         const gaugeRing = document.getElementById("gaugeRing");
         const gaugeText = document.getElementById("gaugeValue");
         
@@ -542,11 +558,10 @@
         
         document.getElementById("legend-income").textContent = formatCurrency(totalIncome);
         document.getElementById("legend-expense").textContent = formatCurrency(totalExpense);
-        document.getElementById("net-savings").textContent = formatCurrency(savings);
       }
 
       function renderBudgetChart() {
-        const trend = getMonthlyTrend(state.range);
+        const trend = getMonthlyTrend(state.chartRange);
         const chartCtx = document.getElementById("budgetChart");
         if (window.expenseChart) window.expenseChart.destroy();
         window.expenseChart = new Chart(chartCtx, {
@@ -567,7 +582,7 @@
         const data = categories.map(category => ({
           category,
           total: state.transactions
-            .filter(t => t.type === "expense" && t.category === category && isCurrentMonth(t.date))
+            .filter(t => t.type === "expense" && t.category === category && isInSelectedRange(t.date))
             .reduce((sum, item) => sum + item.amount, 0)
         }));
 
@@ -583,7 +598,6 @@
 
       function renderVarianceList() {
         const variance = getVarianceList();
-        
         document.getElementById("varianceList").innerHTML = variance.map(item => {
           if (item.budgetIsZero && item.delta === 0) {
             return `<div class="variance-item"><div class="label">${item.category}</div><div class="label" style="grid-column: span 2; text-align: right;">No budget set</div></div>`;
@@ -594,7 +608,7 @@
           return `<div class="variance-item">
               <div class="label">${item.category}</div>
               <div class="delta ${item.direction === "up" ? "down" : "up"}">${item.direction === "up" ? "▲" : "▼"} ₹${item.delta}</div>
-              <div class="label">${item.direction === "up" ? "Over budget" : "Under budget"}</div>
+              <div class="label">${item.direction === "up" ? "Over limit" : "Under limit"}</div>
             </div>`;
         }).join("");
       }
@@ -602,7 +616,6 @@
       function renderBudgetTable() {
         const tbody = document.getElementById("budgetTableBody");
         const activeBudgets = Object.entries(state.budgets).filter(([cat, amt]) => amt > 0);
-
         if (activeBudgets.length === 0) {
             tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--muted); padding: 24px;">No active budgets</td></tr>`;
         } else {
@@ -621,9 +634,7 @@
                 try {
                     await fetch(`${budgetApiBase}/category/${categoryToReset}`, { method: 'DELETE' });
                     await fetchTransactions(); 
-                } catch(error) {
-                    alert("Error deleting budget.");
-                }
+                } catch(error) { alert("Error deleting budget."); }
             });
         });
       }
@@ -631,7 +642,6 @@
       function renderTransactions() {
         const tbody = document.getElementById("transactionTableBody");
         const sorted = [...state.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
-
         tbody.innerHTML = sorted.map(item => `
           <tr>
             <td style="font-weight: 600;">${item.title}</td>
@@ -652,9 +662,7 @@
                 const res = await fetch(`${txApiBase}/${id}`, { method: 'DELETE' });
                 if(!res.ok) throw new Error("Delete failed");
                 await fetchTransactions(); 
-            } catch(e) {
-                alert("Error deleting from database.");
-            }
+            } catch(e) { alert("Error deleting from database."); }
           });
         });
       }
@@ -663,6 +671,16 @@
         renderOverview(); renderBudgetChart(); renderCategoryChart(); renderVarianceList(); renderBudgetTable(); renderTransactions();
       }
 
+      document.getElementById("overviewRange").addEventListener("change", function(e) {
+          state.overviewRange = e.target.value;
+          renderOverview();
+          renderCategoryChart();
+      });
+
+      document.getElementById("budgetCardCategory").addEventListener("change", function() {
+          renderOverview();
+      });
+
       document.getElementById("entryType").addEventListener("change", updateCategoryDropdown);
 
       document.getElementById("budgetForm").addEventListener("submit", async function (e) {
@@ -670,30 +688,16 @@
         const category = document.getElementById("budgetCategory").value;
         const amount = Number(document.getElementById("budgetAmount").value);
         if (!Number.isFinite(amount) || amount <= 0) return;
-
         try {
-            const res = await fetch(budgetApiBase, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ category: category, monthlyLimit: amount })
-            });
-            
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(errorText || "Server rejected the request");
-            }
-
+            const res = await fetch(budgetApiBase, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: category, monthlyLimit: amount }) });
+            if (!res.ok) throw new Error(await res.text() || "Server rejected the request");
             await fetchTransactions(); 
             document.getElementById("budgetForm").reset();
-        } catch(error) {
-            console.error(error);
-            alert("Backend Error: Check Eclipse console! " + error.message);
-        }
+        } catch(error) { alert("Backend Error: Check Eclipse console! " + error.message); }
       });
 
       document.getElementById("entryForm").addEventListener("submit", async function (e) {
         e.preventDefault();
-        
         const payload = {
             description: document.getElementById("entryTitle").value,
             type: document.getElementById("entryType").value,
@@ -702,22 +706,14 @@
             amount: Number(document.getElementById("entryAmount").value),
             date: document.getElementById("entryDate").value
         };
-
         try {
-            const res = await fetch(txApiBase, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            const res = await fetch(txApiBase, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if (!res.ok) throw new Error("Save Failed");
-            
             await fetchTransactions();
             document.getElementById("entryForm").reset();
             document.getElementById("entryDate").valueAsDate = new Date();
             updateCategoryDropdown();
-        } catch(error) {
-            alert("Error saving to database. Is Spring Boot running?");
-        }
+        } catch(error) { alert("Error saving to database. Is Spring Boot running?"); }
       });
 
       document.getElementById("rangeSwitcher").addEventListener("click", function (e) {
@@ -725,7 +721,7 @@
         if (!btn) return;
         document.querySelectorAll("#rangeSwitcher button").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
-        state.range = btn.dataset.range;
+        state.chartRange = btn.dataset.range;
         renderBudgetChart();
       });
 
