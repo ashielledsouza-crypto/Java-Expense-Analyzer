@@ -66,11 +66,19 @@
       .segmented button { border: none; background: transparent; color: var(--muted); padding: 10px 14px; border-radius: 9px; cursor: pointer; }
       .segmented button.active { color: var(--text); background: rgba(126, 247, 188, 0.12); }
       .gauge-wrap { display: grid; place-items: center; margin-top: 10px; }
-      .gauge-ring { --value: 0; width: 220px; height: 220px; border-radius: 50%; background: conic-gradient(var(--accent) calc(var(--value) * 1%), rgba(255,255,255,0.06) 0); display: grid; place-items: center; position: relative; box-shadow: inset 0 0 30px rgba(126, 247, 188, 0.12); }
+      
+      .gauge-ring { 
+        --value: 0; 
+        --ring-color: var(--accent);
+        width: 220px; height: 220px; border-radius: 50%; 
+        background: conic-gradient(var(--ring-color) calc(var(--value) * 1%), rgba(255,255,255,0.06) 0); 
+        display: grid; place-items: center; position: relative; box-shadow: inset 0 0 30px rgba(126, 247, 188, 0.12); 
+      }
       .gauge-ring::before { content: ""; position: absolute; inset: 18px; border-radius: 50%; background: #091812; border: 1px solid var(--line); }
       .gauge-center { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-      .gauge-center strong { font-size: 2rem; }
+      .gauge-center strong { font-size: 2rem; transition: color 0.3s ease; }
       .gauge-center span { color: var(--muted); }
+      
       .gauge-legend { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; color: var(--muted); }
       .gauge-legend div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
       .dot { width: 10px; height: 10px; display: inline-block; border-radius: 50%; margin-right: 8px; }
@@ -103,6 +111,7 @@
       .type-pill.income { background: rgba(126, 247, 188, 0.12); color: var(--accent); }
       .type-pill.expense { background: rgba(255, 127, 140, 0.12); color: #ffb3bc; }
       .del-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: 700; }
+      .del-budget-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: 700; }
       @media (max-width: 1100px) { .hero, .content-grid, .forms-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
       @media (max-width: 760px) { .topbar { flex-wrap: wrap; justify-content: center; } .nav { width: 100%; justify-content: center; flex-wrap: wrap; } .hero { padding: 20px 18px; } .hero h2 { font-size: 2.5rem; } .mini-stats, .stats-grid { grid-template-columns: 1fr; } .hero-actions { flex-wrap: wrap; } .panel-header { flex-direction: column; align-items: flex-start; } }
     </style>
@@ -136,9 +145,9 @@
             <button class="btn-secondary" id="setBudgetBtn">Set Budget</button>
           </div>
           <div class="mini-stats">
-            <div class="mini-stat"><span>Income</span><strong id="hero-income">₹0</strong></div>
-            <div class="mini-stat"><span>Expense</span><strong id="hero-expense">₹0</strong></div>
-            <div class="mini-stat"><span>Savings</span><strong id="hero-savings">₹0</strong></div>
+            <div class="mini-stat"><span>Monthly Income</span><strong id="hero-income">₹0</strong></div>
+            <div class="mini-stat"><span>Monthly Expense</span><strong id="hero-expense">₹0</strong></div>
+            <div class="mini-stat"><span>Monthly Savings</span><strong id="hero-savings">₹0</strong></div>
           </div>
         </div>
         <div class="hero-visual">
@@ -149,14 +158,14 @@
             <span>Net Savings</span><strong id="net-savings">₹0</strong><small id="savings-growth">Live from Database</small>
           </div>
           <div class="floating-card card-b">
-            <span>Budget Used</span><strong id="budget-used">0%</strong>
+            <span>Budget Used</span><strong id="budget-used">0.00%</strong>
           </div>
         </div>
       </section>
 
       <section class="stats-grid">
-        <article class="stat-card accent"><div class="stat-icon">📈</div><div><span>Total Income</span><h3 id="sum-income">₹0</h3></div></article>
-        <article class="stat-card"><div class="stat-icon">📉</div><div><span>Total Expense</span><h3 id="sum-expense">₹0</h3></div></article>
+        <article class="stat-card accent"><div class="stat-icon">📈</div><div><span>Monthly Income</span><h3 id="sum-income">₹0</h3></div></article>
+        <article class="stat-card"><div class="stat-icon">📉</div><div><span>Monthly Expense</span><h3 id="sum-expense">₹0</h3></div></article>
         <article class="stat-card"><div class="stat-icon">💰</div><div><span>Monthly Saved</span><h3 id="sum-saved">₹0</h3></div></article>
         <article class="stat-card"><div class="stat-icon">🎯</div><div><span>Budget Left</span><h3 id="budget-left">₹0</h3></div></article>
       </section>
@@ -176,10 +185,10 @@
         </article>
 
         <article class="panel">
-          <div class="panel-header"><div><span class="section-label">Financial Balance</span><h3>Income vs Expense</h3></div></div>
+          <div class="panel-header"><div><span class="section-label">Financial Balance (Current Month)</span><h3>Income vs Expense</h3></div></div>
           <div class="gauge-wrap">
             <div class="gauge-ring" id="gaugeRing">
-              <div class="gauge-center"><strong id="gaugeValue">0%</strong><span>Used</span></div>
+              <div class="gauge-center"><strong id="gaugeValue">0.00%</strong><span>Spent</span></div>
             </div>
           </div>
           <div class="gauge-legend">
@@ -191,19 +200,20 @@
 
       <section class="content-grid" id="insights" style="margin-top: 26px;">
         <article class="panel">
-          <div class="panel-header"><div><span class="section-label">Breakdown</span><h3>Category Allocation</h3></div></div>
+          <div class="panel-header"><div><span class="section-label">Breakdown (Current Month)</span><h3>Category Allocation</h3></div></div>
           <canvas id="categoryChart"></canvas>
         </article>
         <article class="panel">
-          <div class="panel-header"><div><span class="section-label">Variance Analysis</span><h3>Spend vs Budget</h3></div></div>
+          <div class="panel-header"><div><span class="section-label">Variance Analysis (Current Month)</span><h3>Spend vs Budget</h3></div></div>
           <div id="varianceList" class="variance-list"></div>
         </article>
       </section>
 
       <section class="forms-grid">
         <div class="form-card" id="budget-form-card">
-          <div class="panel-header"><div><span class="section-label">Budget</span><h3>Edit Local Budget</h3></div></div>
-          <form id="budgetForm">
+          <div class="panel-header"><div><span class="section-label">Local Storage</span><h3>Edit Budget</h3></div></div>
+          
+          <form id="budgetForm" style="margin-bottom: 24px;">
             <div class="field">
               <label for="budgetCategory">Category</label>
               <select id="budgetCategory">
@@ -217,10 +227,24 @@
             </div>
             <div class="field">
               <label for="budgetAmount">Budget Amount</label>
-              <input id="budgetAmount" type="number" min="0" step="1" placeholder="Enter budget" required />
+              <input id="budgetAmount" type="number" min="1" step="1" placeholder="Enter budget" required />
             </div>
             <button class="submit-btn" type="submit">Update Budget</button>
           </form>
+
+          <h4 style="margin-bottom: 12px; font-size: 0.9rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px;">Current Budgets</h4>
+          <div class="table-wrap" style="max-height: 250px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="budgetTableBody"></tbody>
+            </table>
+          </div>
         </div>
 
         <div class="form-card" id="entry-form-card">
@@ -265,7 +289,7 @@
 
             <div class="field">
               <label for="entryAmount">Amount</label>
-              <input id="entryAmount" type="number" min="0" step="1" placeholder="Amount" required />
+              <input id="entryAmount" type="number" min="1" step="1" placeholder="Amount" required />
             </div>
 
             <div class="field">
@@ -302,8 +326,7 @@
     </div>
 
     <script>
-      const apiBase = "/api/transactions";
-
+      const txApiBase = "/api/transactions";
       const defaultBudgets = { Housing: 0, Food: 0, Travel: 0, Bills: 0, Leisure: 0, Other: 0 };
       
       const state = {
@@ -312,20 +335,26 @@
         transactions: [] 
       };
 
+      function isCurrentMonth(dateString) {
+        const d = new Date(dateString);
+        const now = new Date();
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }
+
       function loadBudgetData() {
-        const saved = localStorage.getItem("smartFinanceBudgets_v2");
+        const saved = localStorage.getItem("smartFinanceBudgets_v3");
         return saved ? { ...defaultBudgets, ...JSON.parse(saved) } : { ...defaultBudgets };
       }
 
       function saveBudgetState() {
-        localStorage.setItem("smartFinanceBudgets_v2", JSON.stringify(state.budgets));
+        localStorage.setItem("smartFinanceBudgets_v3", JSON.stringify(state.budgets));
       }
 
       async function fetchTransactions() {
         const statusText = document.getElementById("dbStatus");
         statusText.textContent = "Syncing...";
         try {
-            const response = await fetch(apiBase);
+            const response = await fetch(txApiBase);
             if (!response.ok) throw new Error("Backend offline");
             const data = await response.json();
             
@@ -355,9 +384,21 @@
         return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
       }
 
-      function getTotalIncome() { return state.transactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0); }
-      function getTotalExpense() { return state.transactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0); }
-      function getBudgetTotal() { return Object.values(state.budgets).reduce((sum, v) => sum + Number(v || 0), 0); }
+      function getTotalIncome() { 
+        return state.transactions
+          .filter(t => t.type === "income" && isCurrentMonth(t.date))
+          .reduce((sum, t) => sum + t.amount, 0); 
+      }
+      
+      function getTotalExpense() { 
+        return state.transactions
+          .filter(t => t.type === "expense" && isCurrentMonth(t.date))
+          .reduce((sum, t) => sum + t.amount, 0); 
+      }
+      
+      function getBudgetTotal() { 
+        return Object.values(state.budgets).reduce((sum, v) => sum + Number(v || 0), 0); 
+      }
 
       function getMonthlyTrend(range) {
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -379,17 +420,8 @@
             const targetYear = d.getFullYear();
             const targetMonth = d.getMonth();
 
-            incomeData.push(state.transactions.filter(t => 
-              t.type === "income" && 
-              new Date(t.date).getFullYear() === targetYear && 
-              new Date(t.date).getMonth() === targetMonth
-            ).reduce((s, t) => s + t.amount, 0));
-            
-            expenseData.push(state.transactions.filter(t => 
-              t.type === "expense" && 
-              new Date(t.date).getFullYear() === targetYear && 
-              new Date(t.date).getMonth() === targetMonth
-            ).reduce((s, t) => s + t.amount, 0));
+            incomeData.push(state.transactions.filter(t => t.type === "income" && new Date(t.date).getFullYear() === targetYear && new Date(t.date).getMonth() === targetMonth).reduce((s, t) => s + t.amount, 0));
+            expenseData.push(state.transactions.filter(t => t.type === "expense" && new Date(t.date).getFullYear() === targetYear && new Date(t.date).getMonth() === targetMonth).reduce((s, t) => s + t.amount, 0));
           }
         } else if (range === "quarterly") {
           const quarters = ["Q1", "Q2", "Q3", "Q4"];
@@ -410,11 +442,11 @@
       }
 
       function getVarianceList() {
-        const categories = Object.keys(defaultBudgets);
+        const categories = Object.keys(state.budgets);
         
         return categories.map(category => {
           const spent = state.transactions
-            .filter(t => t.type === "expense" && t.category === category)
+            .filter(t => t.type === "expense" && t.category === category && isCurrentMonth(t.date))
             .reduce((sum, item) => sum + item.amount, 0);
 
           const budget = state.budgets[category] || 0;
@@ -441,10 +473,45 @@
         document.getElementById("sum-saved").textContent = formatCurrency(savings);
         document.getElementById("budget-left").textContent = formatCurrency(Math.max(budgetTotal - totalExpense, 0));
 
-        const used = budgetTotal === 0 ? 0 : Math.min(100, Math.round((totalExpense / budgetTotal) * 100));
-        document.getElementById("budget-used").textContent = used + "%";
-        document.getElementById("gaugeValue").textContent = used + "%";
-        document.getElementById("gaugeRing").style.setProperty("--value", used);
+        // Hero card - % of Budget Used (2 decimal precise)
+        const budgetUsed = budgetTotal === 0 ? 0 : (totalExpense / budgetTotal) * 100;
+        document.getElementById("budget-used").textContent = budgetUsed.toFixed(2) + "%";
+
+        // ==========================================
+        // PRECISE GAUGE CHART LOGIC
+        // ==========================================
+        let percentSpentText = "0.00%";
+        let numericPercent = 0;
+
+        if (totalIncome > 0) {
+            numericPercent = (totalExpense / totalIncome) * 100;
+            percentSpentText = numericPercent.toFixed(2) + "%";
+        } else if (totalIncome === 0 && totalExpense > 0) {
+            numericPercent = 100; 
+            percentSpentText = ">100%"; // Overspend warning
+        }
+        
+        const visualRing = Math.min(numericPercent, 100); // Cap the CSS circle fill at 100%
+        
+        const gaugeRing = document.getElementById("gaugeRing");
+        const gaugeText = document.getElementById("gaugeValue");
+        
+        gaugeText.textContent = percentSpentText;
+        gaugeRing.style.setProperty("--value", visualRing);
+        
+        // Smart Color Coding
+        if (numericPercent >= 100 && totalExpense > 0) {
+            gaugeRing.style.setProperty("--ring-color", "var(--danger)"); // Red
+            gaugeText.style.color = "var(--danger)";
+        } else if (numericPercent > 80) {
+            gaugeRing.style.setProperty("--ring-color", "var(--warning)"); // Yellow
+            gaugeText.style.color = "var(--warning)";
+        } else {
+            gaugeRing.style.setProperty("--ring-color", "var(--accent)"); // Green
+            gaugeText.style.color = "var(--text)";
+        }
+        // ==========================================
+        
         document.getElementById("legend-income").textContent = formatCurrency(totalIncome);
         document.getElementById("legend-expense").textContent = formatCurrency(totalExpense);
         document.getElementById("net-savings").textContent = formatCurrency(savings);
@@ -468,10 +535,12 @@
       }
 
       function renderCategoryChart() {
-        const categories = Object.keys(defaultBudgets);
+        const categories = Object.keys(state.budgets);
         const data = categories.map(category => ({
           category,
-          total: state.transactions.filter(t => t.type === "expense" && t.category === category).reduce((sum, item) => sum + item.amount, 0)
+          total: state.transactions
+            .filter(t => t.type === "expense" && t.category === category && isCurrentMonth(t.date))
+            .reduce((sum, item) => sum + item.amount, 0)
         }));
 
         const chartCtx = document.getElementById("categoryChart");
@@ -488,30 +557,44 @@
         const variance = getVarianceList();
         
         document.getElementById("varianceList").innerHTML = variance.map(item => {
-          
           if (item.budgetIsZero && item.delta === 0) {
-            return `<div class="variance-item">
-                      <div class="label">${item.category}</div>
-                      <div class="label" style="grid-column: span 2; text-align: right;">No budget set</div>
-                    </div>`;
+            return `<div class="variance-item"><div class="label">${item.category}</div><div class="label" style="grid-column: span 2; text-align: right;">No budget set</div></div>`;
           }
-          
           if (item.budgetIsZero && item.delta > 0) {
-            return `<div class="variance-item">
-                <div class="label">${item.category}</div>
-                <div class="delta down">₹${item.delta}</div>
-                <div class="label">No budget set</div>
-              </div>`;
+            return `<div class="variance-item"><div class="label">${item.category}</div><div class="delta down">₹${item.delta}</div><div class="label">No budget set</div></div>`;
           }
-          
           return `<div class="variance-item">
               <div class="label">${item.category}</div>
-              <div class="delta ${item.direction === "up" ? "down" : "up"}">
-                ${item.direction === "up" ? "▲" : "▼"} ₹${item.delta}
-              </div>
+              <div class="delta ${item.direction === "up" ? "down" : "up"}">${item.direction === "up" ? "▲" : "▼"} ₹${item.delta}</div>
               <div class="label">${item.direction === "up" ? "Over budget" : "Under budget"}</div>
             </div>`;
         }).join("");
+      }
+
+      function renderBudgetTable() {
+        const tbody = document.getElementById("budgetTableBody");
+        const activeBudgets = Object.entries(state.budgets).filter(([cat, amt]) => amt > 0);
+
+        if (activeBudgets.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--muted); padding: 24px;">No active budgets</td></tr>`;
+        } else {
+            tbody.innerHTML = activeBudgets.map(([cat, amt]) => `
+              <tr>
+                <td style="font-weight: 600;">${cat}</td>
+                <td>${formatCurrency(amt)}</td>
+                <td><button class="del-budget-btn" data-category="${cat}">Delete</button></td>
+              </tr>
+            `).join("");
+        }
+
+        document.querySelectorAll(".del-budget-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const categoryToReset = btn.dataset.category;
+                state.budgets[categoryToReset] = 0; 
+                saveBudgetState(); 
+                renderAll(); 
+            });
+        });
       }
 
       function renderTransactions() {
@@ -535,25 +618,24 @@
             if(!confirm("Delete from Database?")) return;
             const id = btn.dataset.id;
             try {
-                const res = await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
+                const res = await fetch(`${txApiBase}/${id}`, { method: 'DELETE' });
                 if(!res.ok) throw new Error("Delete failed");
                 await fetchTransactions(); 
-            } catch(e) {
-                alert("Error deleting from database.");
-            }
+            } catch(e) { alert("Error deleting from database."); }
           });
         });
       }
 
       function renderAll() {
-        renderOverview(); renderBudgetChart(); renderCategoryChart(); renderVarianceList(); renderTransactions();
+        renderOverview(); renderBudgetChart(); renderCategoryChart(); renderVarianceList(); renderBudgetTable(); renderTransactions();
       }
 
       document.getElementById("budgetForm").addEventListener("submit", function (e) {
         e.preventDefault();
         const category = document.getElementById("budgetCategory").value;
         const amount = Number(document.getElementById("budgetAmount").value);
-        if (!Number.isFinite(amount) || amount < 0) return;
+        if (!Number.isFinite(amount) || amount <= 0) return;
+
         state.budgets[category] = amount;
         saveBudgetState();
         renderAll();
@@ -562,7 +644,6 @@
 
       document.getElementById("entryForm").addEventListener("submit", async function (e) {
         e.preventDefault();
-        
         const payload = {
             description: document.getElementById("entryTitle").value,
             type: document.getElementById("entryType").value,
@@ -573,7 +654,7 @@
         };
 
         try {
-            const res = await fetch(apiBase, {
+            const res = await fetch(txApiBase, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -583,9 +664,7 @@
             await fetchTransactions();
             document.getElementById("entryForm").reset();
             document.getElementById("entryDate").valueAsDate = new Date();
-        } catch(error) {
-            alert("Error saving to database. Is Spring Boot running?");
-        }
+        } catch(error) { alert("Error saving to database. Is Spring Boot running?"); }
       });
 
       document.getElementById("rangeSwitcher").addEventListener("click", function (e) {
@@ -604,4 +683,4 @@
       fetchTransactions();
     </script>
   </body>
-</html>
+</html>	
