@@ -90,7 +90,10 @@
       .delta { font-weight: 700; }
       .delta.up { color: var(--accent); }
       .delta.down { color: var(--danger); }
-      canvas { width: 100% !important; height: 330px !important; }
+      
+      /* FIXED: Controlled Chart Container prevents the freeze! */
+      .chart-container { position: relative; width: 100%; height: 330px; }
+      
       .forms-grid { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
       .form-card { padding: 22px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); }
       form { display: flex; flex-direction: column; gap: 14px; }
@@ -181,7 +184,11 @@
               <button data-range="yearly">Yearly</button>
             </div>
           </div>
-          <canvas id="budgetChart"></canvas>
+          
+          <div class="chart-container">
+            <canvas id="budgetChart"></canvas>
+          </div>
+
         </article>
 
         <article class="panel">
@@ -201,7 +208,11 @@
       <section class="content-grid" id="insights" style="margin-top: 26px;">
         <article class="panel">
           <div class="panel-header"><div><span class="section-label">Breakdown (Current Month)</span><h3>Category Allocation</h3></div></div>
-          <canvas id="categoryChart"></canvas>
+          
+          <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+          </div>
+          
         </article>
         <article class="panel">
           <div class="panel-header"><div><span class="section-label">Variance Analysis (Current Month)</span><h3>Spend vs Budget</h3></div></div>
@@ -211,7 +222,7 @@
 
       <section class="forms-grid">
         <div class="form-card" id="budget-form-card">
-          <div class="panel-header"><div><span class="section-label">Local Storage</span><h3>Edit Budget</h3></div></div>
+          <div class="panel-header"><div><span class="section-label">Database</span><h3>Edit Budget</h3></div></div>
           
           <form id="budgetForm" style="margin-bottom: 24px;">
             <div class="field">
@@ -229,7 +240,7 @@
               <label for="budgetAmount">Budget Amount</label>
               <input id="budgetAmount" type="number" min="1" step="1" placeholder="Enter budget" required />
             </div>
-            <button class="submit-btn" type="submit">Update Budget</button>
+            <button class="submit-btn" type="submit">Update DB Budget</button>
           </form>
 
           <h4 style="margin-bottom: 12px; font-size: 0.9rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px;">Current Budgets</h4>
@@ -259,22 +270,14 @@
               <label for="entryType">Type</label>
               <select id="entryType">
                 <option value="INCOME">Income</option>
-                <option value="EXPENSE">Expense</option>
+                <option value="EXPENSE" selected>Expense</option>
               </select>
             </div>
 
             <div class="field">
               <label for="entryCategory">Category</label>
               <select id="entryCategory">
-                <option value="Salary">Salary</option>
-                <option value="Freelance">Freelance</option>
-                <option value="Housing">Housing</option>
-                <option value="Food">Food</option>
-                <option value="Travel">Travel</option>
-                <option value="Bills">Bills</option>
-                <option value="Leisure">Leisure</option>
-                <option value="Other">Other</option>
-              </select>
+                </select>
             </div>
             
             <div class="field">
@@ -327,33 +330,64 @@
 
     <script>
       const txApiBase = "/api/transactions";
+      const budgetApiBase = "/api/budgets";
+
       const defaultBudgets = { Housing: 0, Food: 0, Travel: 0, Bills: 0, Leisure: 0, Other: 0 };
       
+      const categoryOptions = {
+        INCOME: ["Salary", "Freelance"],
+        EXPENSE: ["Housing", "Food", "Travel", "Bills", "Leisure", "Other"]
+      };
+
       const state = {
         range: "monthly",
-        budgets: loadBudgetData(),
+        budgets: { ...defaultBudgets },
         transactions: [] 
       };
 
+      function updateCategoryDropdown() {
+        const typeSelect = document.getElementById("entryType");
+        const categorySelect = document.getElementById("entryCategory");
+        const selectedType = typeSelect.value;
+
+        const availableCategories = categoryOptions[selectedType] || [];
+
+        categorySelect.innerHTML = availableCategories
+          .map(cat => `<option value="${cat}">${cat}</option>`)
+          .join("");
+      }
+
       function isCurrentMonth(dateString) {
+        if (!dateString) return false;
         const d = new Date(dateString);
         const now = new Date();
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       }
 
-      function loadBudgetData() {
-        const saved = localStorage.getItem("smartFinanceBudgets_v3");
-        return saved ? { ...defaultBudgets, ...JSON.parse(saved) } : { ...defaultBudgets };
-      }
-
-      function saveBudgetState() {
-        localStorage.setItem("smartFinanceBudgets_v3", JSON.stringify(state.budgets));
+      async function fetchBudgets() {
+        try {
+          const response = await fetch(budgetApiBase);
+          if (!response.ok) throw new Error("Budget DB offline");
+          
+          const data = await response.json();
+          
+          Object.keys(defaultBudgets).forEach(k => state.budgets[k] = 0);
+          data.forEach(b => {
+             if (state.budgets[b.category] !== undefined) {
+                 state.budgets[b.category] = Number(b.monthlyLimit) || 0;
+             }
+          });
+        } catch (error) {
+          console.error("Budget fetch error:", error);
+        }
       }
 
       async function fetchTransactions() {
         const statusText = document.getElementById("dbStatus");
         statusText.textContent = "Syncing...";
         try {
+            await fetchBudgets(); 
+
             const response = await fetch(txApiBase);
             if (!response.ok) throw new Error("Backend offline");
             const data = await response.json();
@@ -473,13 +507,9 @@
         document.getElementById("sum-saved").textContent = formatCurrency(savings);
         document.getElementById("budget-left").textContent = formatCurrency(Math.max(budgetTotal - totalExpense, 0));
 
-        // Hero card - % of Budget Used (2 decimal precise)
         const budgetUsed = budgetTotal === 0 ? 0 : (totalExpense / budgetTotal) * 100;
         document.getElementById("budget-used").textContent = budgetUsed.toFixed(2) + "%";
 
-        // ==========================================
-        // PRECISE GAUGE CHART LOGIC
-        // ==========================================
         let percentSpentText = "0.00%";
         let numericPercent = 0;
 
@@ -488,10 +518,10 @@
             percentSpentText = numericPercent.toFixed(2) + "%";
         } else if (totalIncome === 0 && totalExpense > 0) {
             numericPercent = 100; 
-            percentSpentText = ">100%"; // Overspend warning
+            percentSpentText = ">100%"; 
         }
         
-        const visualRing = Math.min(numericPercent, 100); // Cap the CSS circle fill at 100%
+        const visualRing = Math.min(numericPercent, 100); 
         
         const gaugeRing = document.getElementById("gaugeRing");
         const gaugeText = document.getElementById("gaugeValue");
@@ -499,18 +529,16 @@
         gaugeText.textContent = percentSpentText;
         gaugeRing.style.setProperty("--value", visualRing);
         
-        // Smart Color Coding
         if (numericPercent >= 100 && totalExpense > 0) {
-            gaugeRing.style.setProperty("--ring-color", "var(--danger)"); // Red
+            gaugeRing.style.setProperty("--ring-color", "var(--danger)"); 
             gaugeText.style.color = "var(--danger)";
         } else if (numericPercent > 80) {
-            gaugeRing.style.setProperty("--ring-color", "var(--warning)"); // Yellow
+            gaugeRing.style.setProperty("--ring-color", "var(--warning)"); 
             gaugeText.style.color = "var(--warning)";
         } else {
-            gaugeRing.style.setProperty("--ring-color", "var(--accent)"); // Green
+            gaugeRing.style.setProperty("--ring-color", "var(--accent)"); 
             gaugeText.style.color = "var(--text)";
         }
-        // ==========================================
         
         document.getElementById("legend-income").textContent = formatCurrency(totalIncome);
         document.getElementById("legend-expense").textContent = formatCurrency(totalExpense);
@@ -588,11 +616,14 @@
         }
 
         document.querySelectorAll(".del-budget-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", async () => {
                 const categoryToReset = btn.dataset.category;
-                state.budgets[categoryToReset] = 0; 
-                saveBudgetState(); 
-                renderAll(); 
+                try {
+                    await fetch(`${budgetApiBase}/category/${categoryToReset}`, { method: 'DELETE' });
+                    await fetchTransactions(); 
+                } catch(error) {
+                    alert("Error deleting budget.");
+                }
             });
         });
       }
@@ -621,7 +652,9 @@
                 const res = await fetch(`${txApiBase}/${id}`, { method: 'DELETE' });
                 if(!res.ok) throw new Error("Delete failed");
                 await fetchTransactions(); 
-            } catch(e) { alert("Error deleting from database."); }
+            } catch(e) {
+                alert("Error deleting from database.");
+            }
           });
         });
       }
@@ -630,20 +663,37 @@
         renderOverview(); renderBudgetChart(); renderCategoryChart(); renderVarianceList(); renderBudgetTable(); renderTransactions();
       }
 
-      document.getElementById("budgetForm").addEventListener("submit", function (e) {
+      document.getElementById("entryType").addEventListener("change", updateCategoryDropdown);
+
+      document.getElementById("budgetForm").addEventListener("submit", async function (e) {
         e.preventDefault();
         const category = document.getElementById("budgetCategory").value;
         const amount = Number(document.getElementById("budgetAmount").value);
         if (!Number.isFinite(amount) || amount <= 0) return;
 
-        state.budgets[category] = amount;
-        saveBudgetState();
-        renderAll();
-        document.getElementById("budgetForm").reset();
+        try {
+            const res = await fetch(budgetApiBase, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category: category, monthlyLimit: amount })
+            });
+            
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || "Server rejected the request");
+            }
+
+            await fetchTransactions(); 
+            document.getElementById("budgetForm").reset();
+        } catch(error) {
+            console.error(error);
+            alert("Backend Error: Check Eclipse console! " + error.message);
+        }
       });
 
       document.getElementById("entryForm").addEventListener("submit", async function (e) {
         e.preventDefault();
+        
         const payload = {
             description: document.getElementById("entryTitle").value,
             type: document.getElementById("entryType").value,
@@ -664,7 +714,10 @@
             await fetchTransactions();
             document.getElementById("entryForm").reset();
             document.getElementById("entryDate").valueAsDate = new Date();
-        } catch(error) { alert("Error saving to database. Is Spring Boot running?"); }
+            updateCategoryDropdown();
+        } catch(error) {
+            alert("Error saving to database. Is Spring Boot running?");
+        }
       });
 
       document.getElementById("rangeSwitcher").addEventListener("click", function (e) {
@@ -680,7 +733,8 @@
       document.getElementById("setBudgetBtn").addEventListener("click", () => document.getElementById("budget-form-card").scrollIntoView({ behavior: "smooth", block: "start" }));
       document.getElementById("entryDate").valueAsDate = new Date();
 
+      updateCategoryDropdown();
       fetchTransactions();
     </script>
   </body>
-</html>	
+</html>

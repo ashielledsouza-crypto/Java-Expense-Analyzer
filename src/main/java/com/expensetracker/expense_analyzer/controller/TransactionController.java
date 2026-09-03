@@ -5,6 +5,7 @@ import com.expensetracker.expense_analyzer.model.Budget;
 import com.expensetracker.expense_analyzer.service.expenseservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.expensetracker.expense_analyzer.repository.Budgetrepo;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +17,9 @@ public class TransactionController {
 
     @Autowired
     private expenseservice expenseServ;
+    
+    @Autowired
+    private Budgetrepo budgetRepo;
 
     // 1. Adding transactions and income
     @PostMapping("/transactions")
@@ -39,16 +43,33 @@ public class TransactionController {
     }
 
     // 4. Budget planner: setting a budget
-    @PostMapping("/budgets")
-    public Budget setBudget(@RequestBody Budget budget) {
-        return expenseServ.saveBudget(budget);
+    @GetMapping("/budgets")
+    public List<Budget> getAllBudgets() {
+        return budgetRepo.findAll();
     }
 
-    // 5. Budget planner: checking category limits
-    @GetMapping("/budgets/status")
-    public String checkBudgetStatus(@RequestParam String category) {
-        return expenseServ.checkBudget(category);
+    @PostMapping("/budgets")
+    public Budget saveOrUpdateBudget(@RequestBody Budget budget) {
+        Budget existing = budgetRepo.findByCategory(budget.getCategory());
+        
+        if (existing != null) {
+            // Updated to use your exact variable name
+            existing.setMonthlyLimit(budget.getMonthlyLimit());
+            return budgetRepo.save(existing);
+        }
+        
+        return budgetRepo.save(budget);
     }
+
+    @DeleteMapping("/budgets/category/{category}")
+    public void deleteBudget(@PathVariable String category) {
+        // Find the budget by category name and delete it
+        Budget existing = budgetRepo.findByCategory(category);
+        if (existing != null) {
+            budgetRepo.delete(existing);
+        }
+    }
+
     
     @GetMapping("/expenses/summary")
     public Map<String, Double> getExpenseSummary() {
